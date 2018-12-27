@@ -20,7 +20,7 @@ namespace Mapsui.Samples.Common.Helpers
             // (Is there a way to access sqlite files directly as memory stream?).
 
             var embeddedResourcesPath = "Mapsui.Samples.Common.EmbeddedResources.";
-            var mbTileFiles = new[] { "world.mbtiles", "el-molar.mbtiles", "torrejon-de-ardoz.mbtiles" };
+            var mbTileFiles = new[] { "imray_world.mbtiles", "imray_regions.sqlite", "imray_id00.sqlite", "world.mbtiles", "el-molar.mbtiles", "torrejon-de-ardoz.mbtiles" };
 
             foreach (var mbTileFile in mbTileFiles)
             {

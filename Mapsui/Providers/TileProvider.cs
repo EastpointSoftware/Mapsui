@@ -24,6 +24,7 @@ using BruTile.Cache;
 using Mapsui.Geometries;
 using System.IO;
 using System.Threading.Tasks;
+using BruTile.Extensions;
 using Mapsui.Logging;
 
 namespace Mapsui.Providers
@@ -71,7 +72,7 @@ namespace Mapsui.Providers
             {
                 byte[] bitmap = _bitmaps.Find(info.Index);
                 if (bitmap == null) continue;
-                IRaster raster = new Raster(new MemoryStream(bitmap), new BoundingBox(info.Extent.MinX, info.Extent.MinY, info.Extent.MaxX, info.Extent.MaxY));
+                IRaster raster = new Raster(new MemoryStream(bitmap), new BoundingBox(info.Extent.MinX, info.Extent.MinY, info.Extent.MaxX, info.Extent.MaxY), info.Description());
                 IFeature feature = features.New();
                 feature.Geometry = raster;
                 features.Add(feature);

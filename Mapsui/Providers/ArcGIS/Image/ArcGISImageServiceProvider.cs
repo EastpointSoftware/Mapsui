@@ -136,7 +136,7 @@ namespace Mapsui.Providers.ArcGIS.Image
                    try
                    {
                        var bytes = BruTile.Utilities.ReadFully(dataStream);
-                       raster = new Raster(new MemoryStream(bytes), viewport.Extent);
+                       raster = new Raster(new MemoryStream(bytes), viewport.Extent, "ArcGIS");
                    }
                    catch (Exception ex)
                    {

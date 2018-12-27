@@ -9,10 +9,11 @@ namespace Mapsui.Geometries
     {
         private readonly BoundingBox _boundingBox;
 
-        public Raster(MemoryStream data, BoundingBox box)
+        public Raster(MemoryStream data, BoundingBox box, string description)
         {
             Data = data;
             _boundingBox = box;
+            Description = description;
             TickFetched = DateTime.Now.Ticks;
         }
 
@@ -20,6 +21,7 @@ namespace Mapsui.Geometries
         public long TickFetched { get; }
 
         public override BoundingBox BoundingBox => _boundingBox;
+        public string Description { get; set; }
 
         public new string AsText()
         {
@@ -41,7 +43,7 @@ namespace Mapsui.Geometries
             var copy = new MemoryStream();
             Data.Position = 0;
             Data.CopyTo(copy);
-            return new Raster(copy, _boundingBox.Clone());
+            return new Raster(copy, _boundingBox.Clone(), Description);
         }
         
         public override double Distance(Point point)

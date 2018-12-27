@@ -153,7 +153,7 @@ namespace Mapsui.Providers.ArcGIS.Dynamic
             {
                 var response = client.GetAsync(uri).Result;
                 var bytes = BruTile.Utilities.ReadFully(response.Content.ReadAsStreamAsync().Result);
-                raster = new Raster(new MemoryStream(bytes), viewport.Extent);
+                raster = new Raster(new MemoryStream(bytes), viewport.Extent, "ArcGIS");
                 response.Dispose();
                 return true;
             }

@@ -110,7 +110,7 @@ namespace Mapsui.Layers
                     {
                         _cache.ReplaceFeatures(new Features
                         {
-                            new Feature {Geometry = new Raster(bitmapStream, viewport.Extent)}
+                            new Feature {Geometry = new Raster(bitmapStream, viewport.Extent, "Rasterizing")}
                         });
 
                         Logger.Log(LogLevel.Debug, $"Memory after rasterizing layer {GC.GetTotalMemory(true):N0}");

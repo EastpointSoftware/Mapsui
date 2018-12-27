@@ -8,9 +8,11 @@ using Mapsui.Logging;
 using Mapsui.Providers;
 using Mapsui.Rendering.Skia.SkiaWidgets;
 using Mapsui.Styles;
+using Mapsui.Styles.Thematics;
 using Mapsui.Widgets;
 using Mapsui.Widgets.ScaleBar;
 using Mapsui.Widgets.Zoom;
+using Newtonsoft.Json;
 using SkiaSharp;
 
 namespace Mapsui.Rendering.Skia
@@ -94,7 +96,20 @@ namespace Mapsui.Rendering.Skia
             {
                 layers = layers.ToList();
 
-                VisibleFeatureIterator.IterateLayers(viewport, layers, (v, l, s, o) => { RenderFeature(canvas, v, l, s, o); });
+                var mergedBaseTiles = new TileLayer(null);
+                
+                foreach (var layer in layers)
+                {
+                    if (layer.Enabled == false) continue;
+                    if (layer.MinVisible > viewport.Resolution) continue;
+                    if (layer.MaxVisible < viewport.Resolution) continue;
+
+                    IterateLayer(canvas, viewport, layer);
+
+                    // RenderFeature(canvas, v, l, s, o);
+                }
+
+                //VisibleFeatureIterator.IterateMapLayers(viewport, layers, (v, l, s, o) => { RenderFeature(canvas, v, l, s, o); });
 
                 RemovedUnusedBitmapsFromCache();
 
@@ -105,6 +120,67 @@ namespace Mapsui.Rendering.Skia
                 Logger.Log(LogLevel.Error, "Unexpected error in skia renderer", exception);
             }
         }
+
+        private void callback(SKCanvas canvas, IReadOnlyViewport v, IStyle l, IFeature s, float o)
+        {
+            RenderFeature(canvas, v, l, s, o);
+        }
+
+        private void IterateLayer(SKCanvas canvas, IReadOnlyViewport viewport, ILayer layer)
+        {
+            var features = layer.GetFeaturesInView(viewport.Extent, viewport.Resolution).ToList();
+            Console.WriteLine("LAYER: " + layer.Name);
+            Console.WriteLine();
+            var layerStyles = ToArray(layer);
+            foreach (var layerStyle in layerStyles)
+            {
+                var style = layerStyle; // This is the default that could be overridden by an IThemeStyle
+
+                foreach (var feature in features)
+                {
+                    if (layerStyle is IThemeStyle) style = (layerStyle as IThemeStyle).GetStyle(feature);
+                    if (ShouldNotBeApplied(style, viewport)) continue;
+
+                    if (style is StyleCollection styles) // The ThemeStyle can again return a StyleCollection
+                    {
+                        foreach (var s in styles)
+                        {
+                            if (ShouldNotBeApplied(s, viewport)) continue;
+                            callback(canvas, viewport, s, feature, (float)layer.Opacity);
+                        }
+                    }
+                    else
+                    {
+                        if(feature?.Geometry is IRaster raster)
+                            Console.WriteLine("FEATURE: " + raster.Description);
+                        callback(canvas, viewport, style, feature, (float)layer.Opacity);
+                    }
+                }
+            }
+
+            foreach (var feature in features)
+            {
+                var featureStyles = feature.Styles ?? Enumerable.Empty<IStyle>(); // null check
+                foreach (var featureStyle in featureStyles)
+                {
+                    if (ShouldNotBeApplied(featureStyle, viewport)) continue;
+
+                    callback(canvas, viewport, featureStyle, feature, (float)layer.Opacity);
+
+                }
+            }
+        }
+
+        private static bool ShouldNotBeApplied(IStyle style, IReadOnlyViewport viewport)
+        {
+            return style == null || !style.Enabled || style.MinVisible > viewport.Resolution || style.MaxVisible < viewport.Resolution;
+        }
+
+        private static IStyle[] ToArray(ILayer layer)
+        {
+            return (layer.Style as StyleCollection)?.ToArray() ?? new[] { layer.Style };
+        }
+
 
         private void RemovedUnusedBitmapsFromCache()
         {
