@@ -111,9 +111,37 @@ namespace Mapsui.Rendering.Skia
             return 0; // center
         }
 
-        public static void RenderRaster(SKCanvas canvas, SKImage bitmap, SKRect rect, float layerOpacity)
+        public static void RenderRaster(SKCanvas canvas, SKImage bitmap, SKRect rect, float layerOpacity, string description)
         {
             canvas.DrawImage(bitmap, rect, GetPaint(layerOpacity));
+
+            // add a border and notes to demo the rendering
+            // the brush (fill with blue)
+            var paint = new SKPaint
+            {
+                Style = SKPaintStyle.Stroke,
+                Color = SKColors.Blue
+            };
+
+            // draw stroke border of tile
+            canvas.DrawRect(rect, paint);
+
+            // vary text overlay dimensions based on rectangle size
+            int rowHeight = (int)Math.Min(24, rect.Height / 4);
+            int margin = (int)Math.Min(10, rect.Height / 20); ;
+
+            paint.TextSize = (float)Math.Round(rowHeight / 1.3, 0);
+            paint.IsAntialias = true;
+            paint.IsStroke = false;
+
+            var stringParts = description.Split('-');
+            for (int i = 0; i < stringParts.Length; i++)
+            {
+                // draw each element, one line at a time
+                // canvas can't handle /r/n, so add each row individually
+                // first one would draw above the rectangle, so we add a single rowheight to each line to avoid that.
+                canvas.DrawText(stringParts[i], rect.Left + margin, rect.Top + rowHeight + margin + (i * rowHeight), paint);
+            }
         }
 
         private static SKPaint GetPaint(float layerOpacity)

@@ -9,6 +9,7 @@ using ConcurrentCollections;
 using Mapsui.Geometries;
 using Mapsui.Providers;
 using System.Runtime.CompilerServices;
+using BruTile.Extensions;
 
 [assembly: InternalsVisibleTo("Mapsui.Tests")]
 namespace Mapsui.Fetcher
@@ -167,7 +168,7 @@ namespace Mapsui.Fetcher
 
             if (tileData == null) return null;
 
-            return new Raster(new MemoryStream(tileData), tileInfo.Extent.ToBoundingBox());
+            return new Raster(new MemoryStream(tileData), tileInfo.Extent.ToBoundingBox(), tileInfo.Description());
         }
     }
 }

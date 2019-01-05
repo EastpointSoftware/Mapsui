@@ -9,17 +9,19 @@ namespace Mapsui.Geometries
     {
         private readonly BoundingBox _boundingBox;
 
-        public Raster(MemoryStream data, BoundingBox box)
+        public Raster(MemoryStream data, BoundingBox box, string description = "")
         {
             Data = data;
             _boundingBox = box;
             TickFetched = DateTime.Now.Ticks;
+            Description = description;
         }
 
         public MemoryStream Data { get; }
         public long TickFetched { get; }
 
         public override BoundingBox BoundingBox => _boundingBox;
+        public string Description { get; set; }
 
         public new string AsText()
         {

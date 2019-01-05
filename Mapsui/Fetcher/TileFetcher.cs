@@ -23,6 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BruTile;
 using BruTile.Cache;
+using BruTile.Extensions;
 using Mapsui.Annotations;
 using Mapsui.Geometries;
 using Mapsui.Providers;
@@ -232,7 +233,7 @@ namespace Mapsui.Fetcher
 
             if (e.Image == null) return null;
 
-            return new Raster(new MemoryStream(e.Image), e.TileInfo.Extent.ToBoundingBox());
+            return new Raster(new MemoryStream(e.Image), e.TileInfo.Extent.ToBoundingBox(), e.TileInfo.Description());
         }
 
 
