@@ -25,7 +25,7 @@ namespace Mapsui
         public bool HasSize => _viewport.HasSize;
         public bool IsRotated => _viewport.IsRotated;
         public Quad WindowExtent => _viewport.WindowExtent;
-
+        
         public void Transform(Point position, Point previousPosition, double deltaResolution = 1, double deltaRotation = 0)
         {
             if (Map.ZoomLock) deltaResolution = 1;

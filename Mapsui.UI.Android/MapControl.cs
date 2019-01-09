@@ -217,7 +217,7 @@ namespace Mapsui.UI.Android
             for (var i = 0; i < motionEvent.PointerCount; i++)
             {
                 result.Add(new Point(motionEvent.GetX(i) - view.Left, motionEvent.GetY(i) - view.Top)
-                    .ToDeviceIndependentUnits(PixelDensity));
+                    );//.ToDeviceIndependentUnits(PixelDensity));
             }
             return result;
         }
@@ -230,8 +230,8 @@ namespace Mapsui.UI.Android
         /// <returns></returns>
         private Point GetScreenPosition(MotionEvent motionEvent, View view)
         {
-            return GetScreenPositionInPixels(motionEvent, view)
-                .ToDeviceIndependentUnits(PixelDensity);
+            return GetScreenPositionInPixels(motionEvent, view);
+                //.ToDeviceIndependentUnits(PixelDensity);
         }
 
         /// <summary>
@@ -325,8 +325,8 @@ namespace Mapsui.UI.Android
             return (new Point(centerX, centerY), radius, angle);
         }
 
-        private float ViewportWidth => ToDeviceIndependentUnits(Width);
-        private float ViewportHeight => ToDeviceIndependentUnits(Height);
+        private float ViewportWidth => Width; // ToDeviceIndependentUnits(Width);
+        private float ViewportHeight => Height; // ToDeviceIndependentUnits(Height);
 
         /// <summary>
         /// In native Android touch positions are in pixels whereas the canvas needs
