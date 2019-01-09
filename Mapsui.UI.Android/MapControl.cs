@@ -44,7 +44,7 @@ namespace Mapsui.UI.Android
         public void Initialize()
         {
             SetBackgroundColor(Color.Transparent);
-            _canvas = new SKCanvasView(Context) { IgnorePixelScaling = true };
+            _canvas = new SKCanvasView(Context) { IgnorePixelScaling = false };
             _canvas.PaintSurface += CanvasOnPaintSurface;
             AddView(_canvas);
 
