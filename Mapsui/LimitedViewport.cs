@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using Mapsui.Geometries;
 using Mapsui.UI;
 
@@ -25,13 +26,26 @@ namespace Mapsui
         public bool HasSize => _viewport.HasSize;
         public bool IsRotated => _viewport.IsRotated;
         public Quad WindowExtent => _viewport.WindowExtent;
-        
+
+        int transformCount = 0;
+        double timeTransforming = 0;
+
         public void Transform(Point position, Point previousPosition, double deltaResolution = 1, double deltaRotation = 0)
         {
+
+            var startTime = DateTime.UtcNow;
+            Console.WriteLine($"Transform Started {startTime.ToString("hh:mm:ss.zzzt")}");
             if (Map.ZoomLock) deltaResolution = 1;
             if (Map.PanLock) position = previousPosition;
             _viewport.Transform(position, previousPosition, deltaResolution, deltaRotation);
             Limiter.Limit(_viewport, Map.Resolutions, Map.Envelope);
+            var endTime = DateTime.UtcNow;
+            transformCount++;
+            var difference = endTime - startTime;
+            timeTransforming += difference.Milliseconds;
+            Console.WriteLine($"Transform {transformCount} - Time taken: {difference.TotalMilliseconds}ms. Total so far: {timeTransforming}ms.");
+            Console.WriteLine($"Transform Started {startTime.ToString("hh:mm:ss.zzzt")}");
+            Console.WriteLine($"Transform Ended {endTime.ToString("hh:mm:ss.zzzt")}");
         }
 
         public void SetSize(double width, double height)

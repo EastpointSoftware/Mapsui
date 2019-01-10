@@ -121,9 +121,18 @@ namespace Mapsui.Layers
         /// <inheritdoc />
         public override IEnumerable<IFeature> GetFeaturesInView(BoundingBox box, double resolution)
         {
+            var methodName = "GetFeaturesInView";
+            var startTime = DateTime.UtcNow;
+
             if (_tileSource?.Schema == null) return Enumerable.Empty<IFeature>();
             UpdateMemoryCacheMinAndMax();
             return _renderGetStrategy.GetFeatures(box, resolution, _tileSource?.Schema, MemoryCache);
+
+            var endTime = DateTime.UtcNow;
+            var difference = endTime - startTime; 
+            Console.WriteLine($"{methodName}  - Time taken: {difference.TotalMilliseconds}ms");
+            Console.WriteLine($"{methodName} Started {startTime.ToString("hh:mm:ss.zzzt")}");
+            Console.WriteLine($"{methodName} Ended {endTime.ToString("hh:mm:ss.zzzt")}");
         }
 
         /// <inheritdoc />

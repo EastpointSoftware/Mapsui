@@ -247,9 +247,18 @@ namespace Mapsui.UI.Android
                 motionEvent.GetY(0) - view.Top).ToMapsui();
         }
 
+        int refreshGraphicsCount = 0;
+
         public void RefreshGraphics()
         {
+            var startTime = DateTime.UtcNow;
             RunOnUIThread(RefreshGraphicsWithTryCatch);
+            var endTime = DateTime.UtcNow;
+            var difference = endTime - startTime;
+            refreshGraphicsCount++;
+            Console.WriteLine($"RefreshGraphics {refreshGraphicsCount} - Time taken: {difference.TotalMilliseconds}ms");
+            Console.WriteLine($"RefreshGraphicsStarted {startTime.ToString("hh:mm:ss.zzzt")}");
+            Console.WriteLine($"RefreshGraphicsEnded {endTime.ToString("hh:mm:ss.zzzt")}"); 
         }
 
         private void RefreshGraphicsWithTryCatch()

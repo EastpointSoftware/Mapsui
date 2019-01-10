@@ -48,6 +48,7 @@ namespace Mapsui.Rendering.Skia
             float opacity = 1f,
             float scale = 1f)
         {
+
             canvas.Save();
 
             canvas.Translate(x, y);
@@ -69,6 +70,7 @@ namespace Mapsui.Rendering.Skia
             RenderBitmap(canvas, bitmap, rect, opacity);
 
             canvas.Restore();
+
         }
 
         public static void RenderSvg(SKCanvas canvas, SkiaSharp.Extended.Svg.SKSvg svg, float x, float y, float orientation = 0,
@@ -111,9 +113,19 @@ namespace Mapsui.Rendering.Skia
             return 0; // center
         }
 
+        static double timeRenderingRaster = 0;
+        static int renderRasterCount = 0;
         public static void RenderRaster(SKCanvas canvas, SKImage bitmap, SKRect rect, float layerOpacity)
         {
+            var startTime = DateTime.UtcNow;
             canvas.DrawImage(bitmap, rect, GetPaint(layerOpacity));
+            var methodName = "RenderRaster";
+            var endTime = DateTime.UtcNow;
+            var difference = endTime - startTime;
+            timeRenderingRaster += difference.Milliseconds;
+            renderRasterCount++;
+            Console.WriteLine($"{methodName}  #{renderRasterCount } - Instance time taken: {difference.TotalMilliseconds}ms. Total so far: {timeRenderingRaster}ms.");
+            Console.WriteLine($"{methodName} Started {startTime.ToString("hh:mm:ss.zzzt")} -  Ended {endTime.ToString("hh:mm:ss.zzzt")}");
         }
 
         private static SKPaint GetPaint(float layerOpacity)
