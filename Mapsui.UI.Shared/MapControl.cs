@@ -261,6 +261,15 @@ namespace Mapsui.UI.Wpf
                     Navigator = new Navigator(_map, _viewport);
                     _viewport.Map = Map;
                     _viewport.Limiter = Map.Limiter;
+
+                    Map.PropertyChanged += delegate (object sender, PropertyChangedEventArgs args)
+                    {
+                        if (args.PropertyName.Equals(nameof(Map.Limiter)))
+                        {
+                            _viewport.Limiter = Map.Limiter;
+                        }
+                    };
+
                     CallHomeIfNeeded();
                 }
 
