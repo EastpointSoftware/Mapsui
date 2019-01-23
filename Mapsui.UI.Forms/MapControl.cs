@@ -225,7 +225,8 @@ namespace Mapsui.UI.Forms
 
         public void RefreshGraphics()
         {
-            RunOnUIThread(() => InvalidateSurface());
+            // Could this be null before Home is called? If so we should change the logic.
+            if (GRContext != null) RunOnUIThread(InvalidateSurface); 
         }
 
         /// <summary>
@@ -525,8 +526,7 @@ namespace Mapsui.UI.Forms
             if (args.Handled)
                 return true;
 
-            var eventReturn = InvokeInfo(Map.Layers, Map.GetWidgetsOfMapAndLayers(), Viewport, screenPosition, 
-                screenPosition, _renderer.SymbolCache, WidgetTouched, numOfTaps);
+            var eventReturn = InvokeInfo(screenPosition, screenPosition, numOfTaps);
 
             if (eventReturn != null)
             {
@@ -554,8 +554,7 @@ namespace Mapsui.UI.Forms
             if (args.Handled)
                 return true;
 
-            var eventReturn = InvokeInfo(Map.Layers, Map.GetWidgetsOfMapAndLayers(), Viewport, screenPosition, 
-                screenPosition, _renderer.SymbolCache, WidgetTouched, 1);
+            var eventReturn = InvokeInfo(screenPosition, screenPosition, 1);
 
             if (eventReturn != null)
                 return eventReturn.Handled;

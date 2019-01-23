@@ -50,6 +50,11 @@ namespace Mapsui
         }
 
         /// <summary>
+        /// To register if the initial Home call has been done.
+        /// </summary>
+        public bool Initialized { get; set; }
+
+        /// <summary>
         /// When true the user can not pan (move) the map.
         /// </summary>
         public bool PanLock { get; set; }
@@ -70,6 +75,10 @@ namespace Mapsui
         public List<IWidget> Widgets { get; } = new List<IWidget>();
 
         private IViewportLimiter _limiter = new ViewportLimiter();
+        
+        /// <summary>
+        /// Limit the extent to which the user can navigate
+        /// </summary>
         public IViewportLimiter Limiter
         {
             get => _limiter;
