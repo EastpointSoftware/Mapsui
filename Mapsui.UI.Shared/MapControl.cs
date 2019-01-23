@@ -271,6 +271,7 @@ namespace Mapsui.UI.Wpf
                     };
 
                     CallHomeIfNeeded();
+
                 }
 
                 Refresh();

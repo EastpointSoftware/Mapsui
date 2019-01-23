@@ -75,6 +75,7 @@ namespace Mapsui
         public List<IWidget> Widgets { get; } = new List<IWidget>();
 
         private IViewportLimiter _limiter = new ViewportLimiter();
+        
         /// <summary>
         /// Limit the extent to which the user can navigate
         /// </summary>
