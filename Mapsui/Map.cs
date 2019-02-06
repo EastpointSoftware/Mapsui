@@ -151,7 +151,23 @@ namespace Mapsui
                 {
                     bbox = bbox == null ? layer.Envelope : bbox.Join(layer.Envelope);
                 }
-                return bbox;
+
+                if (Limiter?.PanLimits != null)
+                {
+                    if (bbox == null)
+                    {
+                        return Limiter.PanLimits;
+                    }
+                    else
+                    {
+                        var limitedBBox = bbox?.Intersect(Limiter.PanLimits);
+                        return limitedBBox;
+                    }
+                }
+                else
+                {
+                    return bbox;
+                }
             }
         }
 
