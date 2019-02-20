@@ -75,7 +75,7 @@ namespace Mapsui
         public List<IWidget> Widgets { get; } = new List<IWidget>();
 
         private IViewportLimiter _limiter = new ViewportLimiter();
-        
+
         /// <summary>
         /// Limit the extent to which the user can navigate
         /// </summary>
@@ -157,7 +157,23 @@ namespace Mapsui
                 {
                     bbox = bbox == null ? layer.Envelope : bbox.Join(layer.Envelope);
                 }
-                return bbox;
+
+                if (Limiter?.PanLimits != null)
+                {
+                    if (bbox == null)
+                    {
+                        return Limiter.PanLimits;
+                    }
+                    else
+                    {
+                        var limitedBBox = bbox?.Intersect(Limiter.PanLimits);
+                        return limitedBBox;
+                    }
+                }
+                else
+                {
+                    return bbox;
+                }
             }
         }
 

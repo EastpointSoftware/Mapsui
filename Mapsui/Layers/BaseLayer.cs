@@ -232,6 +232,15 @@ namespace Mapsui.Layers
 
         public abstract void RefreshData(BoundingBox extent, double resolution, bool majorChange);
 
+        public virtual bool HandleDrag(Point position, Point lastPosition)
+        {
+            return false;
+        }
+
+        public virtual void HandleGestureEnd()
+        {
+        }
+
         /// <inheritdoc />
         public virtual bool? IsCrsSupported(string crs)
         {

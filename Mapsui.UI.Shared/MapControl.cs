@@ -261,6 +261,8 @@ namespace Mapsui.UI.Wpf
                     Navigator = new Navigator(_map, _viewport);
                     _viewport.Map = Map;
                     _viewport.Limiter = Map.Limiter;
+                    if (Viewport.HasSize) _map.Home(Navigator); // If size is not set yet Home will be called at set size. This is okay.
+
 
                     Map.PropertyChanged += delegate (object sender, PropertyChangedEventArgs args)
                     {
@@ -271,7 +273,6 @@ namespace Mapsui.UI.Wpf
                     };
 
                     CallHomeIfNeeded();
-
                 }
 
                 Refresh();

@@ -147,5 +147,8 @@ namespace Mapsui.Layers
         /// </param>
         void RefreshData(BoundingBox extent, double resolution, bool majorChange);
 
+        bool HandleDrag(Point position, Point lastPosition);
+
+        void HandleGestureEnd();
     }
 }

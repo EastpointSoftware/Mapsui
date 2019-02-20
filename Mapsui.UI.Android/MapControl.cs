@@ -98,11 +98,18 @@ namespace Mapsui.UI.Android
             if (_gestureDetector.OnTouchEvent(args.Event))
                 return;
 
+
+
             var touchPoints = GetScreenPositions(args.Event, this);
 
             switch (args.Event.Action)
             {
                 case MotionEventActions.Up:
+                    for (var i = 1; i <= Map.Layers.Count; i++)
+                    {
+                        var layer = Map.Layers[Map.Layers.Count - i];
+                        layer.HandleGestureEnd();
+                    }
                     Refresh();
                     _mode = TouchMode.None;
                     break;
@@ -153,6 +160,16 @@ namespace Mapsui.UI.Android
                                 var touch = touchPoints.First();
                                 if (_previousTouch != null && !_previousTouch.IsEmpty())
                                 {
+                                    for (var i = 1; i <= Map.Layers.Count; i++)
+                                    {
+                                        var layer = Map.Layers[Map.Layers.Count - i];
+                                        if (layer.HandleDrag(touch, _previousTouch))
+                                        {
+                                            RefreshGraphics();
+                                            _previousTouch = touch;
+                                            return;
+                                        }
+                                    }
                                     _viewport.Transform(touch, _previousTouch);
                                     RefreshGraphics();
                                 }
