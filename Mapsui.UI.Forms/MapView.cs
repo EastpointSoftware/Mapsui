@@ -25,8 +25,8 @@ namespace Mapsui.UI.Forms
         private readonly MyLocationLayer _mapMyLocationLayer;
         private const string PinLayerName = "Pins";
         private const string DrawableLayerName = "Drawables";
-        private readonly Layer _mapPinLayer;
-        private readonly Layer _mapDrawableLayer;
+        private readonly MemoryLayer _mapPinLayer;
+        private readonly MemoryLayer _mapDrawableLayer;
         private readonly StackLayout _mapButtons;
         private readonly SvgButton _mapZoomInButton;
         private readonly SvgButton _mapZoomOutButton;
@@ -53,8 +53,8 @@ namespace Mapsui.UI.Forms
 
             _mapControl = new MapControl { UseDoubleTap = false };
             _mapMyLocationLayer = new MyLocationLayer(this) { Enabled = true };
-            _mapPinLayer = new Layer(PinLayerName) { IsMapInfoLayer = true };
-            _mapDrawableLayer = new Layer(DrawableLayerName) { IsMapInfoLayer = true };
+            _mapPinLayer = new MemoryLayer() { Name = PinLayerName, IsMapInfoLayer = true };
+            _mapDrawableLayer = new MemoryLayer() { Name = DrawableLayerName, IsMapInfoLayer = true };
 
             // Get defaults from MapControl
             RotationLock = Map.RotationLock;
@@ -74,6 +74,14 @@ namespace Mapsui.UI.Forms
             {
                 Device.BeginInvokeOnMainThread(() => MyLocationFollow = false);
             };
+
+            // Add MapView layers to Map
+            AddLayers();
+
+            // Add some events to _mapControl.Map.Layers
+            _mapControl.Map.Layers.LayerAdded += HandlerLayerChanged;
+            _mapControl.Map.Layers.LayerMoved += HandlerLayerChanged;
+            _mapControl.Map.Layers.LayerRemoved += HandlerLayerChanged;
 
             AbsoluteLayout.SetLayoutBounds(_mapControl, new Rectangle(0, 0, 1, 1));
             AbsoluteLayout.SetLayoutFlags(_mapControl, AbsoluteLayoutFlags.All);
@@ -214,9 +222,7 @@ namespace Mapsui.UI.Forms
                 {
                     _mapControl.Viewport.ViewportChanged -= HandlerViewportChanged;
                     _mapControl.Info -= HandlerInfo;
-                    _mapControl.Map.Layers.Remove(_mapPinLayer);
-                    _mapControl.Map.Layers.Remove(_mapDrawableLayer);
-                    _mapControl.Map.Layers.Remove(_mapMyLocationLayer);
+                    RemoveLayers();
                 }
 
                 _mapControl.Map = value;
@@ -394,13 +400,6 @@ namespace Mapsui.UI.Forms
         }
 
         /// <inheritdoc />
-        public MapInfo GetMapInfo(IEnumerable<ILayer> layers, Geometries.Point screenPosition, int margin = 0)
-        {
-            return MapInfoHelper.GetMapInfo(layers, Viewport,
-                screenPosition, _mapControl.Renderer.SymbolCache, margin);
-        }
-
-        /// <inheritdoc />
         public void RefreshGraphics()
         {
             _mapControl.RefreshGraphics();
@@ -449,13 +448,10 @@ namespace Mapsui.UI.Forms
         /// <param name="position">Position of callout</param>
         public Callout CreateCallout(Position position)
         {
-            Device.BeginInvokeOnMainThread(() =>
+            _callout = new Callout(_mapControl)
             {
-                _callout = new Callout(_mapControl)
-                {
-                    Anchor = position
-                };
-            });
+                Anchor = position
+            };
 
             // My interpretation (PDD): This while keeps looping until the asynchronous call
             // above has created a callout.
@@ -605,15 +601,11 @@ namespace Mapsui.UI.Forms
             {
                 if (_mapControl.Map != null)
                 {
-                    // Add layer for MyLocation
-                    if (!_mapControl.Map.Layers.Contains(_mapMyLocationLayer))
-                        _mapControl.Map.Layers.Add(_mapMyLocationLayer);
-                    // Draw drawables first
-                    if (!_mapControl.Map.Layers.Contains(_mapDrawableLayer))
-                        _mapControl.Map.Layers.Add(_mapDrawableLayer);
-                    // Draw pins on top of drawables
-                    if (!_mapControl.Map.Layers.Contains(_mapPinLayer))
-                        _mapControl.Map.Layers.Add(_mapPinLayer);
+                    // Remove MapView layers
+                    RemoveLayers();
+
+                    // Readd them, so that they always on top
+                    AddLayers();
                 }
             }
         }
@@ -661,8 +653,16 @@ namespace Mapsui.UI.Forms
             ViewportInitialized?.Invoke(sender, e);
         }
 
-        private void HandlerHover(object sender, HoveredEventArgs e)
+        private void HandlerLayerChanged(ILayer layer)
         {
+            if (layer == _mapMyLocationLayer || layer == _mapDrawableLayer || layer == _mapPinLayer)
+                return;
+
+            // Remove MapView layers
+            RemoveLayers();
+
+            // Readd them, so that they always on top
+            AddLayers();
         }
 
         private void HandlerPinsOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -682,7 +682,7 @@ namespace Mapsui.UI.Forms
 
                         pin.PropertyChanged -= HandlerPinPropertyChanged;
 
-                        if (SelectedPin.Equals(pin))
+                        if (SelectedPin != null && SelectedPin.Equals(pin))
                             SelectedPin = null;
                     }
                 }
@@ -723,6 +723,10 @@ namespace Mapsui.UI.Forms
             }
 
             Refresh();
+        }
+
+        private void HandlerHover(object sender, HoveredEventArgs e)
+        {
         }
 
         private void HandlerInfo(object sender, MapInfoEventArgs e)
@@ -855,12 +859,34 @@ namespace Mapsui.UI.Forms
         #endregion
 
         /// <summary>
+        /// Add all layers that MapView uses
+        /// </summary>
+        private void AddLayers()
+        {
+            // Add MapView layers
+            _mapControl.Map.Layers.Add(_mapDrawableLayer);
+            _mapControl.Map.Layers.Add(_mapPinLayer);
+            _mapControl.Map.Layers.Add(_mapMyLocationLayer);
+        }
+
+        /// <summary>
+        /// Remove all layers that MapView uses
+        /// </summary>
+        private void RemoveLayers()
+        {
+            // Remove MapView layers
+            _mapControl.Map.Layers.Remove(_mapMyLocationLayer);
+            _mapControl.Map.Layers.Remove(_mapPinLayer);
+            _mapControl.Map.Layers.Remove(_mapDrawableLayer);
+        }
+
+        /// <summary>
         /// Get all drawables of layer that contain given point
         /// </summary>
         /// <param name="point">Point to search for in world coordinates</param>
         /// <param name="layer">Layer to search for drawables</param>
         /// <returns>List with all drawables at point, which are clickable</returns>
-        private IList<Drawable> GetDrawablesAt(Geometries.Point point, Layer layer)
+        private IList<Drawable> GetDrawablesAt(Geometries.Point point, ILayer layer)
         {
             List<Drawable> drawables = new List<Drawable>();
 

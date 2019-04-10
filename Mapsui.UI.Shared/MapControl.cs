@@ -82,6 +82,7 @@ namespace Mapsui.UI.Wpf
         }
 
         private readonly LimitedViewport _viewport = new LimitedViewport();
+        private INavigator _navigator;
 
         /// <summary>
         /// Viewport holding information about visible part of the map. Viewport can never be null.
@@ -91,7 +92,21 @@ namespace Mapsui.UI.Wpf
         /// <summary>
         /// Handles all manipulations of the map viewport
         /// </summary>
-        public INavigator Navigator { get; private set; }
+        public INavigator Navigator
+        {
+            get => _navigator;
+            private set
+            {
+                _navigator = value ?? throw new ArgumentException($"{nameof(Navigator)} can not be null");
+                _navigator.Navigated += Navigated;
+            }
+        }
+
+        private void Navigated(object sender, EventArgs e)
+        {
+            _map.Initialized = true;
+            Refresh();
+        }
 
         /// <summary>
         /// Called when the viewport is initialized
@@ -227,6 +242,10 @@ namespace Mapsui.UI.Wpf
                 CallHomeIfNeeded();
                 Refresh();
             }
+            if (e.PropertyName.Equals(nameof(Map.Limiter)))
+            {
+                _viewport.Limiter = Map.Limiter;
+            }
         }
         // ReSharper restore RedundantNameQualifier
 
@@ -331,14 +350,7 @@ namespace Mapsui.UI.Wpf
         /// <inheritdoc />
         public MapInfo GetMapInfo(Point screenPosition, int margin = 0)
         {
-            return MapInfoHelper.GetMapInfo(Map.Layers.Where(l => l.IsMapInfoLayer), Viewport,
-                screenPosition, Renderer.SymbolCache, margin);
-        }
-
-        /// <inheritdoc />
-        public MapInfo GetMapInfo(IEnumerable<ILayer> layers, Point screenPosition, int margin = 0)
-        {
-            return MapInfoHelper.GetMapInfo(layers, Viewport,
+            return MapInfoHelper.GetMapInfo(Map.Layers.Where(l => l.IsMapInfoLayer).ToList(), Viewport,
                 screenPosition, Renderer.SymbolCache, margin);
         }
 
@@ -351,8 +363,15 @@ namespace Mapsui.UI.Wpf
         /// <returns>True, if something done </returns>
         private MapInfoEventArgs InvokeInfo(Point screenPosition, Point startScreenPosition, int numTaps)
         {
-            return InvokeInfo(Map.Layers.Where(l => l.IsMapInfoLayer), Map.GetWidgetsOfMapAndLayers(), Viewport,
-                screenPosition, startScreenPosition, _renderer.SymbolCache, WidgetTouched, numTaps);
+            return InvokeInfo(
+                Map.Layers.Where(l => l.IsMapInfoLayer).ToList(), 
+                Map.GetWidgetsOfMapAndLayers(), 
+                Viewport,
+                screenPosition, 
+                startScreenPosition, 
+                _renderer.SymbolCache, 
+                WidgetTouched, 
+                numTaps);
         }
 
         /// <summary>
@@ -363,8 +382,8 @@ namespace Mapsui.UI.Wpf
         /// <param name="viewport">The current Viewport</param>
         /// <param name="screenPosition">Screen position to check for widgets and features</param>
         /// <param name="startScreenPosition">Screen position of Viewport/MapControl</param>
-        /// <param name="symbolCache">Cache for symbols to determin size</param>
-        /// <param name="widgetCallback">Callback, which is called when Widget is hiten</param>
+        /// <param name="symbolCache">Cache for symbols to determine size</param>
+        /// <param name="widgetCallback">Callback, which is called when Widget is hit</param>
         /// <param name="numTaps">Number of clickes/taps</param>
         /// <returns>True, if something done </returns>
         private static MapInfoEventArgs InvokeInfo(IEnumerable<ILayer> layers, IEnumerable<IWidget> widgets, 
@@ -409,7 +428,7 @@ namespace Mapsui.UI.Wpf
         {
             var hadSize = Viewport.HasSize;
             _viewport.SetSize(ViewportWidth, ViewportHeight);
-            if (hadSize && Viewport.HasSize) OnViewportSizeInitialized();
+            if (!hadSize && Viewport.HasSize) OnViewportSizeInitialized();
             CallHomeIfNeeded();
             Refresh();
         }

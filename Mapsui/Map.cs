@@ -39,6 +39,7 @@ namespace Mapsui
     {
         private LayerCollection _layers = new LayerCollection();
         private Color _backColor = Color.White;
+        private IViewportLimiter _limiter = new ViewportLimiter();
 
         /// <summary>
         /// Initializes a new map
@@ -73,8 +74,6 @@ namespace Mapsui
         /// List of Widgets belonging to map
         /// </summary>
         public List<IWidget> Widgets { get; } = new List<IWidget>();
-
-        private IViewportLimiter _limiter = new ViewportLimiter();
 
         /// <summary>
         /// Limit the extent to which the user can navigate

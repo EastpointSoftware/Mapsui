@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width">
     <meta name="title" content="Class Layer
    ">
-    <meta name="generator" content="docfx 2.40.7.0">
+    <meta name="generator" content="docfx 2.40.12.0">
     
     <link rel="shortcut icon" href="../images/favicon.ico">
     <link rel="stylesheet" href="../styles/docfx.vendor.css">
@@ -19,7 +19,7 @@
     <meta property="docfx:navrel" content="../toc.html">
     <meta property="docfx:tocrel" content="toc.html">
     
-    
+    <meta property="docfx:rel" content="../">
     
   </head>
   <body data-spy="scroll" data-target="#affix" data-offset="120">
@@ -58,6 +58,16 @@
           </div>
         </div>
       </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list"></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination"></ul>
+        </div>
+      </div>
       <div role="main" class="container body-content hide-when-search">
         
         <div class="sidenav hide-when-search">
@@ -80,7 +90,6 @@
     <div class="level0"><span class="xref">System.Object</span></div>
     <div class="level1"><a class="xref" href="Mapsui.Layers.BaseLayer.html">BaseLayer</a></div>
     <div class="level2"><span class="xref">Layer</span></div>
-      <div class="level3"><a class="xref" href="Mapsui.UI.Objects.MyLocationLayer.html">MyLocationLayer</a></div>
   </div>
   <div classs="implements">
     <h5>Implements</h5>
@@ -146,6 +155,9 @@
     </div>
     <div>
       <a class="xref" href="Mapsui.Layers.BaseLayer.html#Mapsui_Layers_BaseLayer_IsMapInfoLayer">BaseLayer.IsMapInfoLayer</a>
+    </div>
+    <div>
+      <a class="xref" href="Mapsui.Layers.BaseLayer.html#Mapsui_Layers_BaseLayer_DataHasChanged">BaseLayer.DataHasChanged()</a>
     </div>
     <div>
       <a class="xref" href="Mapsui.Layers.BaseLayer.html#Mapsui_Layers_BaseLayer_ToString">BaseLayer.ToString()</a>
@@ -291,7 +303,7 @@
   </span>
   <a id="Mapsui_Layers_Layer_FetchingPostponedInMilliseconds_" data-uid="Mapsui.Layers.Layer.FetchingPostponedInMilliseconds*"></a>
   <h4 id="Mapsui_Layers_Layer_FetchingPostponedInMilliseconds" data-uid="Mapsui.Layers.Layer.FetchingPostponedInMilliseconds">FetchingPostponedInMilliseconds</h4>
-  <div class="markdown level1 summary"><p>Time to wait before fetiching data</p>
+  <div class="markdown level1 summary"><p>Time to wait before fetching data</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
@@ -485,7 +497,7 @@ the threads will terminate naturally. It will just take a little longer.</p>
       <tr>
         <td><a class="xref" href="Mapsui.Geometries.BoundingBox.html">BoundingBox</a></td>
         <td><span class="parametername">extent</span></td>
-        <td><p>The new extent of the visisble map</p>
+        <td><p>The new extent of the visible map</p>
 </td>
       </tr>
       <tr>
@@ -498,7 +510,7 @@ the threads will terminate naturally. It will just take a little longer.</p>
         <td><span class="xref">System.Boolean</span></td>
         <td><span class="parametername">majorChange</span></td>
         <td><p>If true an implementation should always refresh it&apos;s data. If false (minorChange) the
-implemenatation could ignore it. Example: During dragging a map a WMS layer would not want
+implementation could ignore it. Example: During dragging a map a WMS layer would not want
 to fetch data, only on the drag end.</p>
 </td>
       </tr>
