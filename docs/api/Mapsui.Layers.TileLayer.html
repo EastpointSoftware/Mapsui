@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width">
     <meta name="title" content="Class TileLayer
    ">
-    <meta name="generator" content="docfx 2.40.10.0">
+    <meta name="generator" content="docfx 2.40.12.0">
     
     <link rel="shortcut icon" href="../images/favicon.ico">
     <link rel="stylesheet" href="../styles/docfx.vendor.css">
@@ -153,6 +153,9 @@
     </div>
     <div>
       <a class="xref" href="Mapsui.Layers.BaseLayer.html#Mapsui_Layers_BaseLayer_IsMapInfoLayer">BaseLayer.IsMapInfoLayer</a>
+    </div>
+    <div>
+      <a class="xref" href="Mapsui.Layers.BaseLayer.html#Mapsui_Layers_BaseLayer_DataHasChanged">BaseLayer.DataHasChanged()</a>
     </div>
     <div>
       <a class="xref" href="Mapsui.Layers.BaseLayer.html#Mapsui_Layers_BaseLayer_ToString">BaseLayer.ToString()</a>
@@ -316,37 +319,6 @@
   </table>
   <h5 class="overrides">Overrides</h5>
   <div><a class="xref" href="Mapsui.Layers.BaseLayer.html#Mapsui_Layers_BaseLayer_Envelope">BaseLayer.Envelope</a></div>
-  <span class="small pull-right mobile-hide">
-    <span class="divider">|</span>
-    <a href="https://github.com/Mapsui/Mapsui/new/master/apiSpec/new?filename=Mapsui_Layers_TileLayer_MemoryCache.md&amp;value=---%0Auid%3A%20Mapsui.Layers.TileLayer.MemoryCache%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
-  </span>
-  <span class="small pull-right mobile-hide">
-    <a href="https://github.com/Mapsui/Mapsui/blob/master/Mapsui/Layers/TileLayer.cs/#L113">View Source</a>
-  </span>
-  <a id="Mapsui_Layers_TileLayer_MemoryCache_" data-uid="Mapsui.Layers.TileLayer.MemoryCache*"></a>
-  <h4 id="Mapsui_Layers_TileLayer_MemoryCache" data-uid="Mapsui.Layers.TileLayer.MemoryCache">MemoryCache</h4>
-  <div class="markdown level1 summary"><p>Memory cache for this layer</p>
-</div>
-  <div class="markdown level1 conceptual"></div>
-  <h5 class="decalaration">Declaration</h5>
-  <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public MemoryCache&lt;Feature&gt; MemoryCache { get; }</code></pre>
-  </div>
-  <h5 class="propertyValue">Property Value</h5>
-  <table class="table table-bordered table-striped table-condensed">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="xref">MemoryCache</span>&lt;<a class="xref" href="Mapsui.Providers.Feature.html">Feature</a>&gt;</td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
     <a href="https://github.com/Mapsui/Mapsui/new/master/apiSpec/new?filename=Mapsui_Layers_TileLayer_Resolutions.md&amp;value=---%0Auid%3A%20Mapsui.Layers.TileLayer.Resolutions%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
@@ -583,7 +555,7 @@ the threads will terminate naturally. It will just take a little longer.</p>
       <tr>
         <td><a class="xref" href="Mapsui.Geometries.BoundingBox.html">BoundingBox</a></td>
         <td><span class="parametername">extent</span></td>
-        <td><p>The new extent of the visisble map</p>
+        <td><p>The new extent of the visible map</p>
 </td>
       </tr>
       <tr>
@@ -596,7 +568,7 @@ the threads will terminate naturally. It will just take a little longer.</p>
         <td><span class="xref">System.Boolean</span></td>
         <td><span class="parametername">majorChange</span></td>
         <td><p>If true an implementation should always refresh it&apos;s data. If false (minorChange) the
-implemenatation could ignore it. Example: During dragging a map a WMS layer would not want
+implementation could ignore it. Example: During dragging a map a WMS layer would not want
 to fetch data, only on the drag end.</p>
 </td>
       </tr>
