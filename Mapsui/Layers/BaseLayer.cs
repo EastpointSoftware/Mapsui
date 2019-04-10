@@ -236,7 +236,7 @@ namespace Mapsui.Layers
         {
             DataChanged?.Invoke(this, new DataChangedEventArgs());
         }
-
+         
         // allow a layer to intercept a drag
         public virtual bool HandleDrag(Point position, Point lastPosition)
         {
@@ -245,7 +245,7 @@ namespace Mapsui.Layers
 
         // allow a layer to intercept a maptouch gesture ending
         public virtual void HandleGestureEnd(){}
-
+         
         /// <inheritdoc />
         public virtual bool? IsCrsSupported(string crs)
         {

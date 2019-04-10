@@ -152,10 +152,9 @@ namespace Mapsui.Layers
         /// This is necessary for situations where the layer can not know about changes to it's data
         /// as in the case of editing of a geometry.
         /// </summary>
-        void DataHasChanged();
-
+        void DataHasChanged(); 
         bool HandleDrag(Point position, Point lastPosition);
 
-        void HandleGestureEnd();
+        void HandleGestureEnd(); 
     }
 }

@@ -50,6 +50,9 @@
       <HintPath>..\packages\SkiaSharp.1.60.3\lib\MonoAndroid\SkiaSharp.dll</HintPath>
     </Reference>
     <Reference Include="SkiaSharp.Views.Android, Version=1.60.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\SkiaSharp.1.60.3\lib\MonoAndroid\SkiaSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="SkiaSharp.Views.Android, Version=1.60.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\SkiaSharp.Views.1.60.3\lib\MonoAndroid\SkiaSharp.Views.Android.dll</HintPath>
     </Reference>
     <Reference Include="System" />
