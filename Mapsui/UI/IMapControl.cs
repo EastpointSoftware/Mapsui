@@ -18,7 +18,6 @@ namespace Mapsui.UI
 
         void Refresh();
 
-        INavigator Navigator { get; }
         IReadOnlyViewport Viewport { get; }
 
         double UnSnapRotationDegrees { get; set; }
