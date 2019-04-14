@@ -8,13 +8,13 @@ namespace Mapsui.Rendering.Skia
     public static class LineStringRenderer
     {
         public static void Draw(SKCanvas canvas, IReadOnlyViewport viewport, IStyle style, IFeature feature, IGeometry geometry,
-            float opacity)
+            float opacity, float labelPadding)
         {
             if (style is LabelStyle labelStyle)
             {
                 var worldCenter = geometry.BoundingBox.Centroid;
                 var center = viewport.WorldToScreen(worldCenter);
-                LabelRenderer.Draw(canvas, labelStyle, feature, (float) center.X, (float) center.Y, opacity);
+                LabelRenderer.Draw(canvas, labelStyle, feature, (float) center.X, (float) center.Y, opacity, labelPadding);
             }
             else
             {

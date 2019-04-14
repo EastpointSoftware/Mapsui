@@ -94,7 +94,7 @@ namespace Mapsui.Rendering.Skia
             {
                 layers = layers.ToList();
 
-                VisibleFeatureIterator.IterateLayers(viewport, layers, (v, l, s, o) => { RenderFeature(canvas, v, l, s, o); });
+                VisibleFeatureIterator.IterateLayers(viewport, layers, (v, l, s, o, p) => { RenderFeature(canvas, v, l, s, o, p); });
 
                 RemovedUnusedBitmapsFromCache();
 
@@ -131,16 +131,16 @@ namespace Mapsui.Rendering.Skia
             }
         }
 
-        private void RenderFeature(SKCanvas canvas, IReadOnlyViewport viewport, IStyle style, IFeature feature, float layerOpacity)
+        private void RenderFeature(SKCanvas canvas, IReadOnlyViewport viewport, IStyle style, IFeature feature, float layerOpacity, float labelTextPadding)
         {
             if (feature.Geometry is Point)
-                PointRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, _symbolCache, layerOpacity * style.Opacity);
+                PointRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, _symbolCache, layerOpacity * style.Opacity, labelTextPadding);
             else if (feature.Geometry is MultiPoint)
-                MultiPointRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, _symbolCache, layerOpacity * style.Opacity);
+                MultiPointRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, _symbolCache, layerOpacity * style.Opacity, labelTextPadding);
             else if (feature.Geometry is LineString)
-                LineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity);
+                LineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity, labelTextPadding);
             else if (feature.Geometry is MultiLineString)
-                MultiLineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity);
+                MultiLineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity, labelTextPadding);
             else if (feature.Geometry is Polygon)
                 PolygonRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity, _symbolCache);
             else if (feature.Geometry is MultiPolygon)

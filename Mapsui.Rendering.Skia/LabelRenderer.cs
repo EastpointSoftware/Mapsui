@@ -41,11 +41,11 @@ namespace Mapsui.Rendering.Skia
         }
 
         public static void Draw(SKCanvas canvas, LabelStyle style, IFeature feature, float x, float y,
-            float layerOpacity)
+            float layerOpacity, float padding)
         {
             var text = style.GetLabelText(feature);
             if (string.IsNullOrEmpty(text)) return;
-            DrawLabel(canvas, x, y, style, text, layerOpacity);
+            DrawLabel(canvas, x, y, style, text, layerOpacity, padding);
         }
 
         private static SKImage CreateLabelAsBitmap(LabelStyle style, string text, float layerOpacity)
@@ -77,7 +77,7 @@ namespace Mapsui.Rendering.Skia
             }
         }
 
-        private static void DrawLabel(SKCanvas target, float x, float y, LabelStyle style, string text, float layerOpacity)
+        private static void DrawLabel(SKCanvas target, float x, float y, LabelStyle style, string text, float layerOpacity, float padding)
         {
             UpdatePaint(style, layerOpacity);
 
@@ -99,9 +99,11 @@ namespace Mapsui.Rendering.Skia
 
             Paint.MeasureText(text, ref rect);
 
-            var baseline = -rect.Top;  // Distance from top to baseline of text
+            var paddedRect = new SKRect(rect.Left - padding, rect.Top  - padding, rect.Right + padding, rect.Bottom + padding);
 
-            var drawRect = new SKRect(0, 0, rect.Right - rect.Left, rect.Bottom - rect.Top);
+            var baseline = -paddedRect.Top;  // Distance from top to baseline of text
+             
+            var drawRect = new SKRect(0, 0, paddedRect.Right - paddedRect.Left, paddedRect.Bottom - paddedRect.Top);
 
             if ((style.MaxWidth > 0 && drawRect.Width > maxWidth) || hasNewline)
             {
@@ -190,6 +192,7 @@ namespace Mapsui.Rendering.Skia
                 backRect.Inflate(3, 3);
                 DrawBackground(style, backRect, target, layerOpacity);
             }
+
 
             // If style has a halo value, than draw halo text
             if (style.Halo != null)

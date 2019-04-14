@@ -8,13 +8,13 @@ namespace Mapsui.Rendering.Skia
     public static class MultiLineStringRenderer
     {
         public static void Draw(SKCanvas canvas, IReadOnlyViewport viewport, IStyle style, IFeature feature, IGeometry geometry,
-            float opacity)
+            float opacity, float labelTextPadding)
         {
             var multiLineString = (MultiLineString) geometry;
 
             foreach (var lineString in multiLineString)
             {
-                LineStringRenderer.Draw(canvas, viewport, style, feature, lineString, opacity);
+                LineStringRenderer.Draw(canvas, viewport, style, feature, lineString, opacity, labelTextPadding);
             }
         }
     }

@@ -8,13 +8,13 @@ namespace Mapsui.Rendering.Skia
     internal static class PolygonRenderer
     {
         public static void Draw(SKCanvas canvas, IReadOnlyViewport viewport, IStyle style, IFeature feature, IGeometry geometry,
-            float opacity, SymbolCache symbolCache = null)
+            float opacity, SymbolCache symbolCache = null, float labelTextPadding = 20)
         {
             if (style is LabelStyle labelStyle)
             {
                 var worldCenter = geometry.BoundingBox.Centroid;
                 var center = viewport.WorldToScreen(worldCenter);
-                LabelRenderer.Draw(canvas, labelStyle, feature, (float)center.X, (float)center.Y, opacity);
+                LabelRenderer.Draw(canvas, labelStyle, feature, (float)center.X, (float)center.Y, opacity, labelTextPadding);
             }
             else if (style is StyleCollection styleCollection)
             {

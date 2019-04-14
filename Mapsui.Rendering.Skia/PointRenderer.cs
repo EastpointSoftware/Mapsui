@@ -9,7 +9,7 @@ namespace Mapsui.Rendering.Skia
     static class PointRenderer
     {
         public static void Draw(SKCanvas canvas, IReadOnlyViewport viewport, IStyle style, IFeature feature, 
-            IGeometry geometry, SymbolCache symbolCache, float opacity)
+            IGeometry geometry, SymbolCache symbolCache, float opacity, float labelTextPadding)
         {
             var point = geometry as Point;
             var destination = viewport.WorldToScreen(point);
@@ -17,7 +17,7 @@ namespace Mapsui.Rendering.Skia
             if (style is LabelStyle labelStyle)    // case 1) LabelStyle
             {
                 LabelRenderer.Draw(canvas, labelStyle, feature, (float) destination.X, (float) destination.Y, 
-                    opacity);
+                    opacity, labelTextPadding);
             }
             else if (style is SymbolStyle)
             {
