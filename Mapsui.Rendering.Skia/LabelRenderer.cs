@@ -77,7 +77,7 @@ namespace Mapsui.Rendering.Skia
             }
         }
 
-        private static void DrawLabel(SKCanvas target, float x, float y, LabelStyle style, string text, float layerOpacity, float padding)
+        private static void DrawLabel(SKCanvas target, float x, float y, LabelStyle style, string text, float layerOpacity, float layerPadding)
         {
             UpdatePaint(style, layerOpacity);
 
@@ -99,11 +99,9 @@ namespace Mapsui.Rendering.Skia
 
             Paint.MeasureText(text, ref rect);
 
-            var paddedRect = new SKRect(rect.Left - padding, rect.Top  - padding, rect.Right + padding, rect.Bottom + padding);
+            var baseline = -rect.Top;  // Distance from top to baseline of text
 
-            var baseline = -paddedRect.Top;  // Distance from top to baseline of text
-             
-            var drawRect = new SKRect(0, 0, paddedRect.Right - paddedRect.Left, paddedRect.Bottom - paddedRect.Top);
+            var drawRect = new SKRect(0, 0, rect.Right - rect.Left, rect.Bottom - rect.Top);
 
             if ((style.MaxWidth > 0 && drawRect.Width > maxWidth) || hasNewline)
             {
@@ -138,7 +136,7 @@ namespace Mapsui.Rendering.Skia
                 // Shorten it at begining
                 if (style.WordWrap == LabelStyle.LineBreakMode.HeadTruncation)
                 {
-                    var result = text.Substring(text.Length - (int) style.MaxWidth - 2);
+                    var result = text.Substring(text.Length - (int)style.MaxWidth - 2);
                     while (result.Length > 1 && Paint.MeasureText("..." + result) > maxWidth)
                         result = result.Substring(1);
                     text = "..." + result;
@@ -160,8 +158,8 @@ namespace Mapsui.Rendering.Skia
                 // Shorten it in the middle
                 if (style.WordWrap == LabelStyle.LineBreakMode.MiddleTruncation)
                 {
-                    var result1 = text.Substring(0, (int)(style.MaxWidth/2) + 1);
-                    var result2 = text.Substring(text.Length - (int)(style.MaxWidth/2) - 1);
+                    var result1 = text.Substring(0, (int)(style.MaxWidth / 2) + 1);
+                    var result2 = text.Substring(text.Length - (int)(style.MaxWidth / 2) - 1);
                     while (result1.Length > 1 && result2.Length > 1 &&
                            Paint.MeasureText(result1 + "..." + result2) > maxWidth)
                     {
@@ -177,7 +175,7 @@ namespace Mapsui.Rendering.Skia
 
             var horizontalAlign = CalcHorizontalAlignment(style.HorizontalAlignment);
             var verticalAlign = CalcVerticalAlignment(style.VerticalAlignment);
-                        
+
             var offsetX = style.Offset.IsRelative ? drawRect.Width * style.Offset.X : style.Offset.X;
             var offsetY = style.Offset.IsRelative ? drawRect.Height * style.Offset.Y : style.Offset.Y;
 
@@ -189,10 +187,9 @@ namespace Mapsui.Rendering.Skia
             if (style.BackColor != null)
             {
                 var backRect = drawRect;
-                backRect.Inflate(3, 3);
+                backRect.Inflate(layerPadding, layerPadding);
                 DrawBackground(style, backRect, target, layerOpacity);
             }
-
 
             // If style has a halo value, than draw halo text
             if (style.Halo != null)
@@ -237,6 +234,7 @@ namespace Mapsui.Rendering.Skia
             else
                 target.DrawText(text, drawRect.Left, drawRect.Top + baseline, Paint);
         }
+
 
         private static float CalcHorizontalAlignment(LabelStyle.HorizontalAlignmentEnum horizontalAligment)
         {
