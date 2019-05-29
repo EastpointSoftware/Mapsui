@@ -136,7 +136,7 @@ namespace Mapsui.Widgets.ScaleBar
             }
         }
 
-        public float Scale { get; } = 1;
+        public float Scale { get; set; } = 1;
 
         /// <summary>
         /// Stroke width for lines
@@ -309,8 +309,9 @@ namespace Mapsui.Widgets.ScaleBar
 
             float maxScaleBarLength = Math.Max(scaleBarLength1, scaleBarLength2);
 
-            var posX = CalculatePositionX(0, (int)viewport.Width, _maxWidth);
-            var posY = CalculatePositionY(0, (int)viewport.Height, _height);
+            // margin value will not have scale applied, so factor that out and then back in
+            var posX = CalculatePositionX(0, (int)viewport.Width/ Scale, _maxWidth) * Scale;
+            var posY = CalculatePositionY(0, (int)viewport.Height/ Scale, _height / Scale) * Scale;
 
             float left = posX + stroke * 0.5f * Scale;
             float right = posX + _maxWidth - stroke * 0.5f * Scale;
@@ -319,9 +320,9 @@ namespace Mapsui.Widgets.ScaleBar
             // Top position is Y in the middle of scale bar line
             float top = posY + (drawNoSecondScaleBar ? _height - stroke * 0.5f * Scale : _height * 0.5f);
 
-            switch (TextAlignment)
+            switch (HorizontalAlignment)
             {
-                case Alignment.Center:
+                case HorizontalAlignment.Center:
                     if (drawNoSecondScaleBar)
                     {
                         points = new Point[6];
@@ -347,7 +348,7 @@ namespace Mapsui.Widgets.ScaleBar
                         points[9] = new Point(center2 + scaleBarLength2, top);
                     }
                     break;
-                case Alignment.Left:
+                case HorizontalAlignment.Left:
                     if (drawNoSecondScaleBar)
                     {
                         points = new Point[6];
@@ -371,7 +372,7 @@ namespace Mapsui.Widgets.ScaleBar
                         points[7] = new Point(left + scaleBarLength2, top);
                     }
                     break;
-                case Alignment.Right:
+                case HorizontalAlignment.Right:
                     if (drawNoSecondScaleBar)
                     {
                         points = new Point[6];
@@ -408,6 +409,8 @@ namespace Mapsui.Widgets.ScaleBar
         /// <param name="textSize1">Size of upper text of scalebar</param>
         /// <param name="textSize2">Size of lower text of scalebar</param>
         /// <param name="stroke">Width of line</param>
+        /// <param name="scaleBar1Length"></param>
+        /// <param name="scaleBar2Length"></param>
         /// <returns>
         /// posX1 as left position of upper scalebar text
         /// posY1 as top position of upper scalebar text
@@ -415,46 +418,49 @@ namespace Mapsui.Widgets.ScaleBar
         /// posY2 as top position of lower scalebar text
         /// </returns>
         public (float posX1, float posY1, float posX2, float posY2) GetScaleBarTextPositions(IReadOnlyViewport viewport, 
-            BoundingBox textSize, BoundingBox textSize1, BoundingBox textSize2, float stroke)
+            BoundingBox textSize, BoundingBox textSize1, BoundingBox textSize2, float stroke, float scaleBar1Length, float scaleBar2Length)
         {
             bool drawNoSecondScaleBar = ScaleBarMode == ScaleBarMode.Single || (ScaleBarMode == ScaleBarMode.Both && SecondaryUnitConverter == null);
 
-            float posX = CalculatePositionX(0, (int)viewport.Width, _maxWidth);
-            float posY = CalculatePositionY(0, (int)viewport.Height, _height);
+            float posX = CalculatePositionX(0, (int)viewport.Width/Scale, _maxWidth) * Scale;
+            float posY = CalculatePositionY(0, (int)viewport.Height/Scale, _height / Scale) * Scale;
 
-            float left = posX + (stroke + TextMargin) * Scale;
-            float right1 = posX + _maxWidth - (stroke + TextMargin) * Scale - (float)textSize1.Width;
-            float right2 = posX + _maxWidth - (stroke + TextMargin) * Scale - (float)textSize2.Width;
             float top = posY;
             float bottom = posY + _height - (float)textSize2.Height;
 
             switch (TextAlignment)
             {
                 case Alignment.Center:
+                    float center1 = posX + scaleBar1Length - ((stroke + TextMargin) * Scale + (float)textSize1.Width/2);
+                    float center2 = posX + scaleBar2Length - ((stroke + TextMargin) * Scale + (float)textSize2.Width/2);
                     if (drawNoSecondScaleBar)
                     {
-                        return (posX + (stroke + TextMargin) * Scale + (MaxWidth - 2.0f * (stroke + TextMargin) * Scale - (float)textSize1.Width) / 2.0f, 
+                        return (center1, 
                             top,
                             0, 
                             0);
                     }
                     else
                     {
-                        return (posX + (stroke + TextMargin) * Scale + (MaxWidth - 2.0f * (stroke + TextMargin) * Scale - (float)textSize1.Width) / 2.0f,
-                                top, 
-                                posX + (stroke + TextMargin) * Scale + (MaxWidth - 2.0f * (stroke + TextMargin) * Scale - (float)textSize2.Width) / 2.0f,
+                        return (center1,
+                                top,
+                                center2,
                                 bottom);
                     }
                 case Alignment.Left:
+                    float left1 = posX + scaleBar1Length + (stroke + TextMargin) * Scale;
+                    float left2 = posX + scaleBar2Length + (stroke + TextMargin) * Scale;
                     if (drawNoSecondScaleBar)
                     {
-                        return (left, top, 0, 0);
+                        return (left1, top, 0, 0);
                     }
                     else
                     {
-                        return (left, top, left, bottom);
+                        return (left1, top, left2, bottom);
                     }
                 case Alignment.Right:
+                    float right1 = posX + scaleBar1Length - ((stroke + TextMargin) * Scale + (float)textSize1.Width);
+                    float right2 = posX + scaleBar2Length - ((stroke + TextMargin) * Scale + (float)textSize2.Width);
                     if (drawNoSecondScaleBar)
                     {
                         return (right1, top, 0, 0);
