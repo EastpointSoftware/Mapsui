@@ -56,6 +56,7 @@ namespace Mapsui.Rendering.Skia
                         paint.PathEffect = strokeStyle.ToSkia(lineWidth, dashArray);
                     else
                         paint.PathEffect = null;
+
                     canvas.DrawPath(path, paint);
                 }
             }
