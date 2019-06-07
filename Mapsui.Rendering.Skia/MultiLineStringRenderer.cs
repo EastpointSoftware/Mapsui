@@ -68,14 +68,15 @@ namespace Mapsui.Rendering.Skia
                     .LineStrings
                     .Select(x => x.StartPoint)
                     .Append(multiLineString
-                        .LineStrings.Last().EndPoint);
+                        .LineStrings.Last().EndPoint)
+                    .ToList();
                 
                 var path = startPoints.ToSkiaPath(viewport, canvas.LocalClipBounds);
                 canvas.DrawPath(path, paint);
 
                 var timeTaken = DateTime.UtcNow - startTime;
                 TotalTimeSpan = TotalTimeSpan.Add(timeTaken);
-                Console.WriteLine($"*** MultiLineStringRenderer.Draw *** took {timeTaken.TotalSeconds}.{timeTaken.Milliseconds}. Total time used:  {TotalTimeSpan.TotalSeconds}.{TotalTimeSpan.Milliseconds}");
+                Console.WriteLine($"********* MultiLineStringRenderer.Draw ({startPoints?.Count()} items) *** took {timeTaken.TotalSeconds}.{timeTaken.Milliseconds}. Total time used:  {TotalTimeSpan.TotalSeconds}.{TotalTimeSpan.Milliseconds}");
             }
         }
     }
