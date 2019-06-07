@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using Mapsui.Geometries;
 using Mapsui.Providers;
 using Mapsui.Styles;
@@ -21,12 +22,7 @@ namespace Mapsui.Rendering.Skia
 
             var a = multiLineString.First().BoundingBox.Centroid;
             var b = multiLineString.Last().BoundingBox.Centroid;
-
-            //var dummyLine = new LineString(new List<Point> {a,b});
-            //LineStringRenderer.Draw(canvas, viewport, style, feature, dummyLine, opacity, labelTextPadding);
-
-
-
+            
             float lineWidth = 1;
             var lineColor = new Color();
 
@@ -66,11 +62,28 @@ namespace Mapsui.Rendering.Skia
 
                 var startPoints = multiLineString
                     .LineStrings
+                    .Where(x => x.BoundingBox.Intersects(viewport.Extent))
                     .Select(x => x.StartPoint)
                     .Append(multiLineString
                         .LineStrings.Last().EndPoint)
-                    .ToList();
-                
+                    .ToArray();
+
+                var resampleLimit = 500;
+
+                if (startPoints.Length > resampleLimit)
+                {
+                    var temp = new Point[resampleLimit];
+                    temp[0] = startPoints[0];
+
+                    var sampleStep = startPoints.Length / resampleLimit;
+                    for (int i = 1; i < resampleLimit-1; i++)
+                    {
+                        temp[i] = startPoints[(int)( i * sampleStep)];
+                    }
+                    temp[resampleLimit - 1] = startPoints[startPoints.Length - 1];
+                    startPoints = temp;
+                }
+
                 var path = startPoints.ToSkiaPath(viewport, canvas.LocalClipBounds);
                 canvas.DrawPath(path, paint);
 
