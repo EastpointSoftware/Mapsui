@@ -16,7 +16,7 @@ namespace Mapsui.Rendering.Skia
         /// <param name="clipRect">Rectangle to clip to. All lines outside aren't drawn.</param>
         /// <param name="maxPointsToDraw">Maximum number of points to show on line</param>
         /// <returns></returns>
-        public static SKPath ToContinuousSkiaPath(this Point[] points, IReadOnlyViewport viewport, SKRect clipRect, int maxPointsToDraw)
+        public static SKPath ToContinuousSkiaPath(this IList<Point> points, IReadOnlyViewport viewport, SKRect clipRect, int maxPointsToDraw)
         {
             var path = new SKPath();
             SKPoint lastPoint = SKPoint.Empty;

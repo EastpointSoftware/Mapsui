@@ -60,22 +60,22 @@ namespace Mapsui.Rendering.Skia
 
                 DateTime startTime = DateTime.UtcNow;
 
-                // get the line start points, but reduce sample set up 500x
-                var points = continuousLineString
-                    .Vertices
-                    .Where(x => x.BoundingBox.Intersects(viewport.Extent))
-                    .ToArray();
+                // get the line start points
+                //var points = continuousLineString
+                //    .Vertices
+                //    //.Where(x => x.BoundingBox.Intersects(viewport.Extent))
+                //    .ToArray();
 
-                var resampleTimeTaken = DateTime.UtcNow - startTime;
-                TotalTimeSpan = TotalTimeSpan.Add(resampleTimeTaken);
-                Console.WriteLine($"********* MultiLineStringRenderer.Draw - Prep data: *** took {resampleTimeTaken.TotalSeconds}.{resampleTimeTaken.Milliseconds}.");
+                //var resampleTimeTaken = DateTime.UtcNow - startTime;
+                //TotalTimeSpan = TotalTimeSpan.Add(resampleTimeTaken);
+                //Console.WriteLine($"********* MultiLineStringRenderer.Draw - Prep data: *** took {resampleTimeTaken.TotalSeconds}.{resampleTimeTaken.Milliseconds}.");
                 
-                var path = points.ToContinuousSkiaPath(viewport, canvas.LocalClipBounds, 300);
+                var path = continuousLineString.Vertices.ToContinuousSkiaPath(viewport, canvas.LocalClipBounds, 300);
                 canvas.DrawPath(path, paint);
 
                 var timeTaken = DateTime.UtcNow - startTime;
                 TotalTimeSpan = TotalTimeSpan.Add(timeTaken);
-                Console.WriteLine($"********* MultiLineStringRenderer.Draw ({points?.Count()} items) *** took {timeTaken.TotalSeconds}.{timeTaken.Milliseconds}. Total time used:  {TotalTimeSpan.TotalSeconds}.{TotalTimeSpan.Milliseconds}");
+                Console.WriteLine($"********* MultiLineStringRenderer.Draw ({continuousLineString.Vertices.Count} items) *** took {timeTaken.TotalSeconds}.{timeTaken.Milliseconds}. Total time used:  {TotalTimeSpan.TotalSeconds}.{TotalTimeSpan.Milliseconds}");
             }
         }
     }
