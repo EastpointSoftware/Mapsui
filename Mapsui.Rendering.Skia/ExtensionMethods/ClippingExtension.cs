@@ -8,23 +8,26 @@ namespace Mapsui.Rendering.Skia
 {
     public static class ClippingExtension
     {
-
         /// <summary>
         /// Converts a LineString (list of Mapsui points) in world coordinates to a Skia path
         /// </summary>
-        /// <param name="lineString">List of points in Mapsui world coordinates</param>
+        /// <param name="points">List of points in Mapsui world coordinates</param>
         /// <param name="viewport">Viewport implementation</param>
         /// <param name="clipRect">Rectangle to clip to. All lines outside aren't drawn.</param>
+        /// <param name="maxPointsToDraw">Maximum number of points to show on line</param>
         /// <returns></returns>
-        public static SKPath ToSkiaPath(this Point[] lineString, IReadOnlyViewport viewport, SKRect clipRect)
+        public static SKPath ToContinuousSkiaPath(this Point[] points, IReadOnlyViewport viewport, SKRect clipRect, int maxPointsToDraw)
         {
             var path = new SKPath();
             SKPoint lastPoint = SKPoint.Empty;
 
             var stepper = 1;
-            if (lineString.Count() > 300)
+            if (points.Count() > maxPointsToDraw)
             {
-                stepper = lineString.Count() / 300;
+                // value how many points to step over to 
+                // draw the points in view within the maxPointsToDraw
+                // save one point for the end
+                stepper = points.Count() / (maxPointsToDraw - 1);
             }
 
             var screenCenterX = viewport.Width * 0.5;
@@ -36,18 +39,20 @@ namespace Mapsui.Rendering.Skia
             var sin = Math.Sin(rotation);
             var cos = Math.Cos(rotation);
             
-            for (var i = 1; i <= lineString.Count() - stepper; i = i + stepper)
-            {
-                // if we have a last point, continue from there...
-                SKPoint point1 = lastPoint != SKPoint.Empty ? lastPoint : WorldToScreen(viewport, lineString[i], centerX, resolution, centerY, cos, sin, screenCenterX, screenCenterY);
-                SKPoint point2 = WorldToScreen(viewport, lineString[i - 1 + stepper], centerX, resolution, centerY, cos, sin, screenCenterX, screenCenterY);
+            SKPoint point1 = lastPoint != SKPoint.Empty ? lastPoint : WorldToScreen(viewport, points[0], centerX, resolution, centerY, cos, sin, screenCenterX, screenCenterY);
+
+            for (var i = 1; i <= points.Count() - stepper; i = i + stepper)
+            { 
+               // if we have a last point, continue from there...
+               SKPoint point2 = WorldToScreen(viewport, points[i - 1 + stepper], centerX, resolution, centerY, cos, sin, screenCenterX, screenCenterY);
 
                 // Check each part of LineString, if it is inside or intersects the clipping rectangle
                 var intersect = LiangBarskyClip(point1, point2, clipRect, out var intersectionPoint1, out var intersectionPoint2);
 
                 if (intersect != Intersection.CompleteOutside)
                 {
-                    // If the last point isn't the same as actuall starting point ...
+                    // If the last point isn't the same as actually starting point ...
+                    // either the first loop, or we've skipped a line due to out of bounds
                     if (lastPoint.IsEmpty || !lastPoint.Equals(intersectionPoint1))
                     {
                         // ... than move to this point
@@ -55,10 +60,10 @@ namespace Mapsui.Rendering.Skia
                     }
                     // Draw line
                     path.LineTo(intersectionPoint2);
-
-                    // Save last end point for later use
-                    lastPoint = intersectionPoint2;
                 }
+
+                // Save last end point for next iteration
+                point1 = intersectionPoint2;
             }
             return path;
         }

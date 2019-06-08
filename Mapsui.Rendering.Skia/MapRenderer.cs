@@ -141,6 +141,8 @@ namespace Mapsui.Rendering.Skia
                 LineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity, labelTextPadding);
             else if (feature.Geometry is MultiLineString)
                 MultiLineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity, labelTextPadding);
+            else if (feature.Geometry is ContinuousLineString)
+                ContinuousLineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity, labelTextPadding);
             else if (feature.Geometry is Polygon)
                 PolygonRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity, _symbolCache);
             else if (feature.Geometry is MultiPolygon)
