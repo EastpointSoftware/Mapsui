@@ -88,7 +88,7 @@ namespace Mapsui.Rendering.Skia
             for (var i = 1; i < vertices.Count(); i++)
             {
             // Check each part of LineString, if it is inside or intersects the clipping rectangle
-                var intersect = LiangBarskyClip(vertices[i - 1], vertices[i - 1], clipRect, out var intersectionPoint1, out var intersectionPoint2);
+                var intersect = LiangBarskyClip(vertices[i], vertices[i - 1], clipRect, out var intersectionPoint1, out var intersectionPoint2);
 
                 if (intersect != Intersection.CompleteOutside)
                 {
