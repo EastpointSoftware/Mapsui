@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -236,13 +237,13 @@ namespace Mapsui.Layers
         {
             DataChanged?.Invoke(this, new DataChangedEventArgs());
         }
-         
+
         // allow a layer to intercept a drag
-        public virtual bool HandleDrag(Point position, Point lastPosition)
+        public virtual bool HandleDrag(Point position, Point lastPosition, DateTime touchDownDateTime)
         {
             return false;
         }
-
+        
         // allow a layer to intercept a maptouch gesture ending
         public virtual void HandleGestureEnd(){}
          

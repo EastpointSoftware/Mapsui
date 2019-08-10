@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Timers;
 using Android.Content;
 using Android.Graphics;
 using Android.OS;
@@ -54,10 +55,16 @@ namespace Mapsui.UI.Android
 
             Map = new Map();
             Touch += MapView_Touch;
+            LongClick += MapControl_LongClick;
 
             _gestureDetector = new GestureDetector(Context, new GestureDetector.SimpleOnGestureListener());
             _gestureDetector.SingleTapConfirmed += OnSingleTapped;
             _gestureDetector.DoubleTap += OnDoubleTapped;
+        }
+
+        private void MapControl_LongClick(object sender, LongClickEventArgs e)
+        {
+            var temp = e.Handled;
         }
 
         public float PixelDensity => Resources.DisplayMetrics.Density;
@@ -93,12 +100,15 @@ namespace Mapsui.UI.Android
             Renderer.Render(args.Surface.Canvas, Viewport, _map.Layers, _map.Widgets, _map.BackColor);
         }
 
+        private DateTime _lastTouchDownDateTime = DateTime.MinValue;
+        private System.Timers.Timer _longHoldFocusCheck = null;
+
+
+
         public void MapView_Touch(object sender, TouchEventArgs args)
         {
             if (_gestureDetector.OnTouchEvent(args.Event))
                 return;
-
-
 
             var touchPoints = GetScreenPositions(args.Event, this);
 
@@ -112,11 +122,13 @@ namespace Mapsui.UI.Android
                     }
                     Refresh();
                     _mode = TouchMode.None;
+                    _longHoldFocusCheck.Elapsed -= LongHoldFocusCheckOnElapsed;
                     break;
                 case MotionEventActions.Down:
                 case MotionEventActions.Pointer1Down:
                 case MotionEventActions.Pointer2Down:
                 case MotionEventActions.Pointer3Down:
+
                     if (touchPoints.Count >= 2)
                     {
                         (_previousTouch, _previousRadius, _previousAngle) = GetPinchValues(touchPoints);
@@ -128,6 +140,15 @@ namespace Mapsui.UI.Android
                         _mode = TouchMode.Dragging;
                         _previousTouch = touchPoints.First();
                     }
+                    _lastTouchDownDateTime = DateTime.UtcNow;
+                    _longHoldFocusCheck = new System.Timers.Timer
+                    {
+                        AutoReset = false,
+                        Interval = 550,
+                        Enabled = true
+                    };
+                    _longHoldFocusCheck.Elapsed -= LongHoldFocusCheckOnElapsed;
+                    _longHoldFocusCheck.Elapsed += LongHoldFocusCheckOnElapsed;
                     break;
                 case MotionEventActions.Pointer1Up:
                 case MotionEventActions.Pointer2Up:
@@ -148,6 +169,7 @@ namespace Mapsui.UI.Android
                         _previousTouch = touchPoints.First();
                     }
                     Refresh();
+                    _longHoldFocusCheck.Elapsed -= LongHoldFocusCheckOnElapsed;
                     break;
                 case MotionEventActions.Move:
                     switch (_mode)
@@ -163,7 +185,7 @@ namespace Mapsui.UI.Android
                                     for (var i = 1; i <= Map.Layers.Count; i++)
                                     {
                                         var layer = Map.Layers[Map.Layers.Count - i];
-                                        if (layer.HandleDrag(touch, _previousTouch))
+                                        if (layer.HandleDrag(touch, _previousTouch, _lastTouchDownDateTime))
                                         {
                                             RefreshGraphics();
                                             _previousTouch = touch;
@@ -217,6 +239,23 @@ namespace Mapsui.UI.Android
                             break;
                     }
                     break;
+            }
+        }
+
+        private void LongHoldFocusCheckOnElapsed(object sender, ElapsedEventArgs e)
+        {
+            _longHoldFocusCheck.Elapsed -= LongHoldFocusCheckOnElapsed;
+            if (_previousTouch != null && !_previousTouch.IsEmpty())
+            {
+                for (var i = 1; i <= Map.Layers.Count; i++)
+                {
+                    var layer = Map.Layers[Map.Layers.Count - i];
+                    if (layer.HandleDrag(_previousTouch, _previousTouch, _lastTouchDownDateTime))
+                    {
+                        RefreshGraphics();
+                        return;
+                    }
+                }
             }
         }
 
