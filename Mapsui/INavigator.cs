@@ -50,9 +50,9 @@ namespace Mapsui
         /// <param name="rotation">New rotation in degrees of viewport></param>
         void RotateTo(double rotation);
 
-        void ZoomOut();
+        bool ZoomOut();
 
-        void ZoomIn();
+        bool ZoomIn();
 
         void ZoomIn(Point centerOfZoom);
         

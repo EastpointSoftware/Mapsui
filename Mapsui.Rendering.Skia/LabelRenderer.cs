@@ -13,7 +13,7 @@ namespace Mapsui.Rendering.Skia
     {
         private static readonly IDictionary<string, BitmapInfo> LabelCache =
             new Dictionary<string, BitmapInfo>();
-
+        
         private static readonly SKPaint Paint = new SKPaint
         {
             IsAntialias = true,
@@ -185,10 +185,10 @@ namespace Mapsui.Rendering.Skia
                 y - drawRect.Height * verticalAlign + (float)offsetY);
 
             // If style has a background color, than draw background rectangle
-            if (style.BackColor != null)
+            if (style.BackColor != null || style.LabelBorderColor != null)
             {
                 var backRect = drawRect;
-                backRect.Inflate(3, 3);
+                backRect.Inflate(style.LabelPadding, style.LabelPadding);
                 DrawBackground(style, backRect, target, layerOpacity);
             }
 
@@ -254,16 +254,28 @@ namespace Mapsui.Rendering.Skia
 
         private static void DrawBackground(LabelStyle style, SKRect rect, SKCanvas target, float layerOpacity)
         {
+            var rounding = 6;
             if (style.BackColor != null)
             {
                 var color = style.BackColor?.Color?.ToSkia(layerOpacity);
                 if (color.HasValue)
                 {
-                    var rounding = 6;
                     using (var backgroundPaint = new SKPaint {Color = color.Value})
                     {
                         target.DrawRoundRect(rect, rounding, rounding, backgroundPaint);
                     }
+                }
+            }
+
+            //draw the label border
+            if (style.LabelBorderColor != null)
+            {
+                var color = style.LabelBorderColor?.ToSkia(layerOpacity);
+                using (var paint = new SKPaint { Color = color.Value })
+                {
+                    paint.Style = SKPaintStyle.Stroke;
+                    paint.StrokeWidth = style.LabelBorderWidth;
+                    target.DrawRoundRect(rect, rounding, rounding, paint);
                 }
             }
         }

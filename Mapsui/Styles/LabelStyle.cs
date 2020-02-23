@@ -143,6 +143,22 @@ namespace Mapsui.Styles
         public Pen Halo { get; set; }
 
         /// <summary>
+        /// Sets a border color for around the text
+        /// </summary>
+        public Color LabelBorderColor { get; set; } = null;
+
+
+        /// <summary>
+        /// Sets a border width in pixels for around the text
+        /// </summary>
+        public int LabelBorderWidth { get; set; } = 3;
+
+        /// <summary>
+        /// Sets padding the text
+        /// </summary>
+        public int LabelPadding { get; set; } = 3;
+
+        /// <summary>
         /// Specifies relative position of labels with respect to objects label point
         /// </summary>
         public Offset Offset { get; set; }

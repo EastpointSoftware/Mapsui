@@ -330,6 +330,19 @@ namespace Mapsui.Geometries
         }
 
         /// <summary>
+        ///     Computes the intersection boundingbox of this instance and another boundingbox
+        /// </summary>
+        /// <param name="box">Boundingbox to create inersection with</param>
+        /// <returns>Boundingbox of intersection of both boundingboxes</returns>
+        public BoundingBox Intersect(BoundingBox box)
+        {
+            if (box == null)
+                return Clone();
+            return new BoundingBox(Math.Max(Min.X, box.Min.X), Math.Max(Min.Y, box.Min.Y),
+                Math.Min(Max.X, box.Max.X), Math.Min(Max.Y, box.Max.Y));
+        }
+
+        /// <summary>
         ///     Computes the joined boundingbox of this instance and another boundingbox
         /// </summary>
         /// <param name="box">Boundingbox to join with</param>

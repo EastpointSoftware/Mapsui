@@ -89,20 +89,33 @@ namespace Mapsui
             Navigated?.Invoke(this, EventArgs.Empty);
         }
 
-        public void ZoomIn()
+        public bool ZoomIn()
         {
             var resolution = ZoomHelper.ZoomIn(_map.Resolutions, _viewport.Resolution);
+
+            if (Math.Abs(_viewport.Resolution - resolution) < 0.1)
+            {
+                // nowhere to zoom
+                return false;
+            }
             _viewport.SetResolution(resolution);
 
             Navigated?.Invoke(this, EventArgs.Empty);
+            return true;
         }
 
-        public void ZoomOut()
+        public bool ZoomOut()
         {
             var resolution = ZoomHelper.ZoomOut(_map.Resolutions, _viewport.Resolution);
+            if (Math.Abs(_viewport.Resolution - resolution) < 0.1)
+            {
+                // nowhere to zoom
+                return false;
+            }
             _viewport.SetResolution(resolution);
 
             Navigated?.Invoke(this, EventArgs.Empty);
+            return true;
         }
 
         public void ZoomIn(Point centerOfZoom)
