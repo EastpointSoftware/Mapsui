@@ -11,9 +11,9 @@ using System.Runtime.CompilerServices;
 
 namespace Mapsui.UI.Forms
 {
-    public sealed class Polyline : Drawable
+    public class Polyline : Drawable
     {
-        private readonly ObservableCollection<Position> _positions = new ObservableCollection<Position>();
+        private readonly ObservableRangeCollection<Position> _positions = new ObservableRangeCollection<Position>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Mapsui.UI.Forms.Polyline"/> class.

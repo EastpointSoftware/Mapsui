@@ -95,8 +95,12 @@ namespace Mapsui.UI.Wpf
         public INavigator Navigator
         {
             get => _navigator;
-            private set
+            set
             {
+                if (_navigator != null)
+                {
+                    _navigator.Navigated -= Navigated;
+                }
                 _navigator = value ?? throw new ArgumentException($"{nameof(Navigator)} can not be null");
                 _navigator.Navigated += Navigated;
             }
@@ -339,8 +343,21 @@ namespace Mapsui.UI.Wpf
         /// <inheritdoc />
         public MapInfo GetMapInfo(Point screenPosition, int margin = 0)
         {
-            return MapInfoHelper.GetMapInfo(Map.Layers.Where(l => l.IsMapInfoLayer).ToList(), Viewport,
-                screenPosition, Renderer.SymbolCache, margin);
+            return Renderer.GetMapInfo(screenPosition.X, screenPosition.Y, Viewport, Map.Layers, margin);
+        }
+
+        /// <inheritdoc />
+        public byte[] GetSnapshot(IEnumerable<ILayer> layers = null)
+        {
+            byte[] result = null;
+            
+            using (var stream = Renderer.RenderToBitmapStream(Viewport, layers ?? Map.Layers)) 
+            { 
+                if (stream != null)
+                    result = stream.ToArray(); 
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -375,7 +392,7 @@ namespace Mapsui.UI.Wpf
         /// <param name="widgetCallback">Callback, which is called when Widget is hit</param>
         /// <param name="numTaps">Number of clickes/taps</param>
         /// <returns>True, if something done </returns>
-        private static MapInfoEventArgs InvokeInfo(IEnumerable<ILayer> layers, IEnumerable<IWidget> widgets, 
+        private MapInfoEventArgs InvokeInfo(IEnumerable<ILayer> layers, IEnumerable<IWidget> widgets, 
             IReadOnlyViewport viewport, Point screenPosition, Point startScreenPosition, ISymbolCache symbolCache,
             Func<IWidget, Point, bool> widgetCallback, int numTaps)
         {
@@ -398,7 +415,7 @@ namespace Mapsui.UI.Wpf
                 }
             }
         
-            var mapInfo = MapInfoHelper.GetMapInfo(layers, viewport, screenPosition, symbolCache);
+            var mapInfo = Renderer.GetMapInfo(screenPosition.X, screenPosition.Y, Viewport, Map.Layers);
 
             if (mapInfo != null)
             {
