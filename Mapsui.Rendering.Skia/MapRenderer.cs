@@ -96,8 +96,8 @@ namespace Mapsui.Rendering.Skia
             {
                 layers = layers.ToList();
 
-                VisibleFeatureIterator.IterateLayers(viewport, layers, (v, l, s, f, o) => { RenderFeature(canvas, v, l, s, f, o); });
-
+                VisibleFeatureIterator.IterateLayers(viewport, layers, (v, l, s, f, o, p) => { RenderFeature(canvas, v, l, s, f, o, p); });
+                
                 RemovedUnusedBitmapsFromCache();
 
                 _currentIteration++;
@@ -133,16 +133,20 @@ namespace Mapsui.Rendering.Skia
             }
         }
 
-        private void RenderFeature(SKCanvas canvas, IReadOnlyViewport viewport, ILayer layer, IStyle style, IFeature feature, float layerOpacity)
+
+        private void RenderFeature(SKCanvas canvas, IReadOnlyViewport viewport, ILayer layer, IStyle style, IFeature feature, float layerOpacity, float labelTextPadding)
+
         {
             if (feature.Geometry is Point)
-                PointRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, _symbolCache, layerOpacity * style.Opacity);
+                PointRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, _symbolCache, layerOpacity * style.Opacity, labelTextPadding);
             else if (feature.Geometry is MultiPoint)
-                MultiPointRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, _symbolCache, layerOpacity * style.Opacity);
+                MultiPointRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, _symbolCache, layerOpacity * style.Opacity, labelTextPadding);
             else if (feature.Geometry is LineString)
-                LineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity);
+                LineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity, labelTextPadding);
             else if (feature.Geometry is MultiLineString)
-                MultiLineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity);
+                MultiLineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity, labelTextPadding);
+            else if (feature.Geometry is ContinuousLineString)
+                ContinuousLineStringRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity, labelTextPadding);
             else if (feature.Geometry is Polygon)
                 PolygonRenderer.Draw(canvas, viewport, style, feature, feature.Geometry, layerOpacity * style.Opacity, _symbolCache);
             else if (feature.Geometry is MultiPolygon)
@@ -191,11 +195,11 @@ namespace Mapsui.Rendering.Skia
                     var pixmap = surface.PeekPixels();
                     var color = pixmap.GetPixelColor(intX, intY);
 
-                    VisibleFeatureIterator.IterateLayers(viewport, layers, (v, layer, style, feature, opacity) => {
+                    VisibleFeatureIterator.IterateLayers(viewport, layers, (v, layer, style, feature, opacity, padding) => {
                         // 1) Clear the entire bitmap
                         surface.Canvas.Clear(SKColors.Transparent);
                         // 2) Render the feature to the clean canvas
-                        RenderFeature(surface.Canvas, v, layer, style, feature, opacity);
+                        RenderFeature(surface.Canvas, v, layer, style, feature, opacity, padding);
                         // 3) Check if the pixel has changed.
                         if (color != pixmap.GetPixelColor(intX, intY))
                             // 4) Add feature and style to result

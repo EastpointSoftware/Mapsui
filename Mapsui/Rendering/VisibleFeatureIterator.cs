@@ -11,7 +11,7 @@ namespace Mapsui.Rendering
     public static class VisibleFeatureIterator
     {
         public static void IterateLayers(IReadOnlyViewport viewport, IEnumerable<ILayer> layers,
-            Action<IReadOnlyViewport, ILayer, IStyle, IFeature, float> callback)
+            Action<IReadOnlyViewport, ILayer, IStyle, IFeature, float, float> callback)
         {
             foreach (var layer in layers)
             {
@@ -24,7 +24,7 @@ namespace Mapsui.Rendering
         }
 
         private static void IterateLayer(IReadOnlyViewport viewport, ILayer layer,
-            Action<IReadOnlyViewport, ILayer, IStyle, IFeature, float> callback)
+            Action<IReadOnlyViewport, ILayer, IStyle, IFeature, float, float> callback)
         {
             var features = layer.GetFeaturesInView(viewport.Extent, viewport.Resolution).ToList();
 
@@ -43,12 +43,12 @@ namespace Mapsui.Rendering
                         foreach (var s in styles)
                         {
                             if (ShouldNotBeApplied(s, viewport)) continue;
-                            callback(viewport, layer, s, feature, (float)layer.Opacity);
+                            callback(viewport, layer, s, feature, (float)layer.Opacity, 20);
                         }
                     }
                     else
                     {
-                        callback(viewport, layer, style, feature, (float)layer.Opacity);
+                        callback(viewport, layer, style, feature, (float)layer.Opacity, 20);
                     }
                 }
             }
@@ -59,9 +59,7 @@ namespace Mapsui.Rendering
                 foreach (var featureStyle in featureStyles)
                 {
                     if (ShouldNotBeApplied(featureStyle, viewport)) continue;
-
-                    callback(viewport, layer, featureStyle, feature, (float)layer.Opacity);
-
+                    callback(viewport, layer, featureStyle, feature, (float)layer.Opacity, 20);
                 }
             }
         }

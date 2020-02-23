@@ -11,6 +11,67 @@ namespace Mapsui.Rendering.Skia
         /// <summary>
         /// Converts a LineString (list of Mapsui points) in world coordinates to a Skia path
         /// </summary>
+        /// <param name="points">List of points in Mapsui world coordinates</param>
+        /// <param name="viewport">Viewport implementation</param>
+        /// <param name="clipRect">Rectangle to clip to. All lines outside aren't drawn.</param>
+        /// <param name="maxPointsToDraw">Maximum number of points to show on line</param>
+        /// <returns></returns>
+        public static SKPath ToContinuousSkiaPath(this IList<Point> points, IReadOnlyViewport viewport, SKRect clipRect, int maxPointsToDraw)
+        {
+            var path = new SKPath();
+            SKPoint lastPoint = SKPoint.Empty;
+
+            var stepper = 1;
+            if (points.Count() > maxPointsToDraw)
+            {
+                // value how many points to step over to 
+                // draw the points in view within the maxPointsToDraw
+                // save one point for the end
+                stepper = points.Count() / (maxPointsToDraw - 1);
+            }
+
+            var screenCenterX = viewport.Width * 0.5;
+            var screenCenterY = viewport.Height * 0.5;
+            var centerX = viewport.Center.X;
+            var centerY = viewport.Center.Y;
+            var resolution = 1.0 / viewport.Resolution;
+            var rotation = viewport.Rotation / 180f * Math.PI;
+            var sin = Math.Sin(rotation);
+            var cos = Math.Cos(rotation);
+            
+            SKPoint point1 = lastPoint != SKPoint.Empty ? lastPoint : WorldToScreen(viewport, points[0], centerX, resolution, centerY, cos, sin, screenCenterX, screenCenterY);
+
+            for (var i = 1; i <= points.Count() - stepper; i = i + stepper)
+            { 
+               // if we have a last point, continue from there...
+               SKPoint point2 = WorldToScreen(viewport, points[i - 1 + stepper], centerX, resolution, centerY, cos, sin, screenCenterX, screenCenterY);
+
+                // Check each part of LineString, if it is inside or intersects the clipping rectangle
+                var intersect = LiangBarskyClip(point1, point2, clipRect, out var intersectionPoint1, out var intersectionPoint2);
+
+                if (intersect != Intersection.CompleteOutside)
+                {
+                    // If the last point isn't the same as actually starting point ...
+                    // either the first loop, or we've skipped a line due to out of bounds
+                    if (lastPoint.IsEmpty || !lastPoint.Equals(intersectionPoint1))
+                    {
+                        // ... than move to this point
+                        path.MoveTo(intersectionPoint1);
+                    }
+                    // Draw line
+                    path.LineTo(intersectionPoint2);
+                }
+
+                // Save last end point for next iteration
+                point1 = intersectionPoint2;
+            }
+            return path;
+        }
+
+
+        /// <summary>
+        /// Converts a LineString (list of Mapsui points) in world coordinates to a Skia path
+        /// </summary>
         /// <param name="lineString">List of points in Mapsui world coordinates</param>
         /// <param name="viewport">Viewport implementation</param>
         /// <param name="clipRect">Rectangle to clip to. All lines outside aren't drawn.</param>
@@ -22,11 +83,12 @@ namespace Mapsui.Rendering.Skia
 
             var path = new SKPath();
             SKPoint lastPoint = SKPoint.Empty;
+             
 
-            for (var i = 1; i < vertices.Count; i++)
+            for (var i = 1; i < vertices.Count(); i++)
             {
-                // Check each part of LineString, if it is inside or intersects the clipping rectangle
-                var intersect = LiangBarskyClip(vertices[i - 1], vertices[i], clipRect, out var intersectionPoint1, out var intersectionPoint2);
+            // Check each part of LineString, if it is inside or intersects the clipping rectangle
+                var intersect = LiangBarskyClip(vertices[i], vertices[i - 1], clipRect, out var intersectionPoint1, out var intersectionPoint2);
 
                 if (intersect != Intersection.CompleteOutside)
                 {
@@ -44,6 +106,26 @@ namespace Mapsui.Rendering.Skia
                 }
             }
             return path;
+        }
+
+        private static SKPoint WorldToScreen(IReadOnlyViewport viewport, Point point, double centerX, double resolution,
+            double centerY, double cos, double sin, double screenCenterX, double screenCenterY)
+        {
+            var screenX = (point.X - centerX) * resolution;
+            var screenY = (centerY - point.Y) * resolution;
+
+            if (viewport.IsRotated)
+            {
+                var newX = screenX * cos - screenY * sin;
+                var newY = screenX * sin + screenY * cos;
+                screenX = newX;
+                screenY = newY;
+            }
+
+            screenX += screenCenterX;
+            screenY += screenCenterY;
+
+           return new SKPoint((float) screenX, (float) screenY);
         }
 
         /// <summary>

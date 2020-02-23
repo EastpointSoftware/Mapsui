@@ -142,6 +142,10 @@ namespace Mapsui.Styles
         /// </summary>
         public Pen Halo { get; set; }
 
+        public Color LabelBorderColor { get; set; } = null;
+
+        public int LabelBorderWidth { get; set; } = 3;
+
         /// <summary>
         /// Specifies relative position of labels with respect to objects label point
         /// </summary>

@@ -183,21 +183,26 @@ namespace Mapsui
         /// <summary>
         /// Zoom in to the next resolution
         /// </summary>
-        public void ZoomIn()
+        public bool ZoomIn()
         {
             var resolution = ZoomHelper.ZoomIn(_map.Resolutions, _viewport.Resolution);
 
             ZoomTo(resolution);
+
+            // todo: determine if zoom was viable
+            return true;
         }
 
         /// <summary>
         /// Zoom out to the next resolution
         /// </summary>
-        public void ZoomOut()
+        public bool ZoomOut()
         {
             var resolution = ZoomHelper.ZoomOut(_map.Resolutions, _viewport.Resolution);
 
             ZoomTo(resolution);
+            // todo: determine if zoom was viable
+            return true;
         }
 
         /// <summary>
@@ -208,6 +213,7 @@ namespace Mapsui
         {
             var resolution = ZoomHelper.ZoomIn(_map.Resolutions, _viewport.Resolution);
             ZoomTo(resolution, centerOfZoom);
+
         }
 
         /// <summary>
