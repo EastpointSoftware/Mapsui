@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Mapsui.Geometries.Utilities;
 using Xamarin.Forms;
+using System.Threading.Tasks;
 
 namespace Mapsui.UI.Forms
 {
@@ -29,9 +30,6 @@ namespace Mapsui.UI.Forms
             }
         }
 
-        private const int None = 0;
-        private const int Dragging = 1;
-        private const int Zooming = 2;
         // See http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.0.4_r2.1/android/view/ViewConfiguration.java#ViewConfiguration.0PRESSED_STATE_DURATION for values
         private const int shortTap = 125;
         private const int shortClick = 250;
@@ -46,11 +44,12 @@ namespace Mapsui.UI.Forms
         /// </summary>
         private const int touchSlop = 8;
 
+        private bool _initialized = false;
         private float _skiaScale;
         private double _innerRotation;
         private Dictionary<long, TouchEvent> _touches = new Dictionary<long, TouchEvent>();
         private Geometries.Point _firstTouch;
-        private System.Threading.Timer _doubleTapTestTimer;
+        private bool _waitingForDoubleTap;
         private int _numOfTaps = 0;
         private FlingTracker _velocityTracker = new FlingTracker();
         private Geometries.Point _previousCenter;
@@ -100,6 +99,8 @@ namespace Mapsui.UI.Forms
             PaintSurface += OnPaintSurface;
             Touch += OnTouch;
             SizeChanged += OnSizeChanged;
+
+            _initialized = true;
         }
 
         private void OnSizeChanged(object sender, EventArgs e)
@@ -108,7 +109,7 @@ namespace Mapsui.UI.Forms
             SetViewportSize();
         }
 
-        private void OnTouch(object sender, SKTouchEventArgs e)
+        private async void OnTouch(object sender, SKTouchEventArgs e)
         {
             // Save time, when the event occures
             long ticks = DateTime.Now.Ticks;
@@ -125,10 +126,9 @@ namespace Mapsui.UI.Forms
 
                 // Do we have a doubleTapTestTimer running?
                 // If yes, stop it and increment _numOfTaps
-                if (_doubleTapTestTimer != null)
+                if (_waitingForDoubleTap)
                 {
-                    _doubleTapTestTimer.Dispose();
-                    _doubleTapTestTimer = null;
+                    _waitingForDoubleTap = false;
                     _numOfTaps++;
                 }
                 else
@@ -136,7 +136,7 @@ namespace Mapsui.UI.Forms
 
                 e.Handled = OnTouchStart(_touches.Select(t => t.Value.Location).ToList());
             }
-            if (e.ActionType == SKTouchAction.Released)
+            else if (e.ActionType == SKTouchAction.Released)
             {
                 // Delete e.Id from _touches, because finger is released
                 var releasedTouch = _touches[e.Id];
@@ -173,24 +173,26 @@ namespace Mapsui.UI.Forms
                     // than longTap, than we have a tap.
                     if (isAround && (ticks - releasedTouch.Tick) < (e.DeviceType == SKTouchDeviceType.Mouse ? shortClick : longTap) * 10000)
                     {
-                        // Start a timer with timeout delayTap ms. If than isn't arrived another tap, than it is a single
-                        _doubleTapTestTimer = new System.Threading.Timer((l) =>
+                        _waitingForDoubleTap = true;
+                        if (UseDoubleTap) { await Task.Delay(delayTap); }
+
+                        if (_numOfTaps > 1)
                         {
-                            if (_numOfTaps > 1)
+                            if (!e.Handled)
+                                e.Handled = OnDoubleTapped(location, _numOfTaps);
+                        }
+                        else
+                        {
+                            if (!e.Handled)
                             {
-                                if (!e.Handled)
-                                    e.Handled = OnDoubleTapped(location, _numOfTaps);
+                                e.Handled = OnSingleTapped(location);
                             }
-                            else
-                                if (!e.Handled)
-                                e.Handled = OnSingleTapped((Geometries.Point)l);
-                            _numOfTaps = 1;
-                            if (_doubleTapTestTimer != null)
-                            {
-                                _doubleTapTestTimer.Dispose();
-                            }
-                            _doubleTapTestTimer = null;
-                        }, location, UseDoubleTap ? delayTap : 0, -1);
+                        }
+                        _numOfTaps = 1;
+                        if (_waitingForDoubleTap)
+                        {
+                            _waitingForDoubleTap = false; ;
+                        }
                     }
                     else if (isAround && (ticks - releasedTouch.Tick) >= longTap * 10000)
                     {
@@ -209,7 +211,7 @@ namespace Mapsui.UI.Forms
                 if (!e.Handled)
                     e.Handled = OnTouchEnd(_touches.Select(t => t.Value.Location).ToList(), releasedTouch.Location);
             }
-            if (e.ActionType == SKTouchAction.Moved)
+            else if (e.ActionType == SKTouchAction.Moved)
             {
                 _touches[e.Id] = new TouchEvent(e.Id, location, ticks);
 
@@ -221,15 +223,26 @@ namespace Mapsui.UI.Forms
                 else
                     e.Handled = OnHovered(_touches.Select(t => t.Value.Location).FirstOrDefault());
             }
-            if (e.ActionType == SKTouchAction.Cancelled)
+            else if (e.ActionType == SKTouchAction.Cancelled)
             {
                 _touches.Remove(e.Id);
             }
-            if (e.ActionType == SKTouchAction.Exited)
+            else if (e.ActionType == SKTouchAction.Exited)
             {
             }
-            if (e.ActionType == SKTouchAction.Entered)
+            else if (e.ActionType == SKTouchAction.Entered)
             {
+            }
+            else if (e.ActionType == SKTouchAction.WheelChanged)
+            {
+                if (e.WheelDelta > 0)
+                {
+                    OnZoomIn(location);
+                }
+                else
+                {
+                    OnZoomOut(location);
+                }
             }
         }
 
@@ -249,8 +262,14 @@ namespace Mapsui.UI.Forms
 
         public void RefreshGraphics()
         {
-            // Could this be null before Home is called? If so we should change the logic.
-            if (GRContext != null) RunOnUIThread(InvalidateSurface);
+            if (!_initialized && GRContext == null)
+            {
+                // Could this be null before Home is called? If so we should change the logic.
+                Logging.Logger.Log(Logging.LogLevel.Warning, "Refresh can not be called because GRContext is null");
+                return;
+            }
+
+            RunOnUIThread(InvalidateSurface);
         }
 
         /// <summary>
@@ -555,16 +574,11 @@ namespace Mapsui.UI.Forms
 
             var eventReturn = InvokeInfo(screenPosition, screenPosition, numOfTaps);
 
-            if (eventReturn != null)
-            {
-                if (!eventReturn.Handled)
-                {
-                    // Double tap as zoom
-                    return OnZoomIn(screenPosition);
-                }
-            }
+            if (eventReturn?.Handled == true)
+                return true;
 
-            return false;
+            // Double tap as zoom
+            return OnZoomIn(screenPosition);
         }
 
         /// <summary>
@@ -582,7 +596,10 @@ namespace Mapsui.UI.Forms
                 return true;
 
             var infoToInvoke = InvokeInfo(screenPosition, screenPosition, 1);
-                        
+
+            if (infoToInvoke?.Handled == true)
+                return true;
+
             OnInfo(infoToInvoke);
             return infoToInvoke?.Handled ?? false;
         }
