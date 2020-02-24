@@ -102,6 +102,9 @@ namespace Mapsui.UI.Android
         {
             args.Surface.Canvas.Scale(PixelDensity, PixelDensity);
             Renderer.Render(args.Surface.Canvas, Viewport, _map.Layers, _map.Widgets, _map.BackColor);
+//#if DEBUG
+//            Console.WriteLine($"CanvasOnPaintSurface at {DateTime.UtcNow.ToString("hh:mm:ss")}.");
+//#endif
         }
 
         public void MapView_Touch(object sender, TouchEventArgs args)
