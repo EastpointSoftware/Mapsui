@@ -15,9 +15,10 @@
 // along with SharpMap; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA f
 
+using SkiaSharp.Views.UWP;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
+using System.Linq; 
 using Windows.Devices.Sensors;
 using Windows.Foundation;
 using Windows.Graphics.Display;
@@ -29,7 +30,6 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
-using SkiaSharp.Views.UWP;
 using HorizontalAlignment = Windows.UI.Xaml.HorizontalAlignment;
 using VerticalAlignment = Windows.UI.Xaml.VerticalAlignment;
 
@@ -137,13 +137,13 @@ namespace Mapsui.UI.Uwp
                 Navigator.ZoomIn(mousePosition);
             else if (currentPoint.Properties.MouseWheelDelta < 0)
                 Navigator.ZoomOut(mousePosition);
-            
+
             e.Handled = true;
 
             RefreshGraphics();
             RefreshData();
         }
-        
+
         public void RefreshGraphics()
         {
             RunOnUIThread(() => _canvas?.Invalidate());
@@ -182,7 +182,7 @@ namespace Mapsui.UI.Uwp
         {
             e.TranslationBehavior.DesiredDeceleration = 25 * 96.0 / (1000.0 * 1000.0);
         }
-        
+
         private void OnManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
         {
 
@@ -190,7 +190,7 @@ namespace Mapsui.UI.Uwp
             var radius = e.Delta.Scale;
             var rotation = e.Delta.Rotation;
 
-            var previousCenter=  e.Position.ToMapsui().Offset(-e.Delta.Translation.X, -e.Delta.Translation.Y);
+            var previousCenter = e.Position.ToMapsui().Offset(-e.Delta.Translation.X, -e.Delta.Translation.Y);
             var previousRadius = 1f;
             var previousRotation = 0f;
 

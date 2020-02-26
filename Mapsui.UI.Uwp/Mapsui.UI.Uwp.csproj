@@ -108,7 +108,6 @@
     <Compile Include="ExtensionMethods\PointExtensions.cs" />
     <Compile Include="MapControl.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Properties\Mapsui.UI.Uwp.rd.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mapsui.Geometries\Mapsui.Geometries.csproj">

@@ -43,6 +43,9 @@
     <CodesignKey>iPhone Developer</CodesignKey>
     <CodesignProvision />
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
+    <CodesignExtraArgs />
+    <CodesignResourceRules />
+    <CodesignEntitlements />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -195,10 +198,10 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="BruTile, Version=2.1.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\BruTile.2.1.2\lib\netstandard1.1\BruTile.dll</HintPath>
+      <HintPath>..\..\..\Debug\netstandard1.1\BruTile.dll</HintPath>
     </Reference>
     <Reference Include="BruTile.MbTiles, Version=2.1.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\BruTile.MbTiles.2.1.2\lib\netstandard1.1\BruTile.MbTiles.dll</HintPath>
+      <HintPath>..\..\..\Debug\netstandard1.1\BruTile.MbTiles.dll</HintPath>
     </Reference>
     <Reference Include="Itinero, Version=1.3.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Itinero.1.3.2\lib\netstandard1.3\Itinero.dll</HintPath>
