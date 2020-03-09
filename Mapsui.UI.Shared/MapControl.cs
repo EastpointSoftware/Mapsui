@@ -11,6 +11,7 @@ using Mapsui.Rendering;
 using Mapsui.Rendering.Skia;
 using Mapsui.Widgets;
 using System.Runtime.CompilerServices;
+using System.Timers;
 
 #if __ANDROID__
 namespace Mapsui.UI.Android
@@ -459,6 +460,29 @@ namespace Mapsui.UI.Wpf
             // not sure if we need this method
             _map?.ClearCache();
             RefreshGraphics();
+        }
+
+
+        // For interaction with map layers, a long hold is required before dragging.
+        private DateTime _lastTouchDownDateTime = DateTime.MinValue;
+        private System.Timers.Timer _longHoldFocusCheck = null;
+        private Point _previousTouch = new Point();
+
+        private void LongHoldFocusCheckOnElapsed(object sender, ElapsedEventArgs e)
+        {
+            _longHoldFocusCheck.Elapsed -= LongHoldFocusCheckOnElapsed;
+            if (_previousTouch != null && !_previousTouch.IsEmpty())
+            {
+                for (var i = 1; i <= Map.Layers.Count; i++)
+                {
+                    var layer = Map.Layers[Map.Layers.Count - i];
+                    if (layer.HandleDrag(_previousTouch, _previousTouch, _lastTouchDownDateTime))
+                    {
+                        RefreshGraphics();
+                        return;
+                    }
+                }
+            }
         }
     }
 }

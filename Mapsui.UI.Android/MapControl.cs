@@ -25,14 +25,7 @@ namespace Mapsui.UI.Android
         private double _previousRadius = 1f;
         private TouchMode _mode = TouchMode.None;
         private Handler _mainLooperHandler;
-
-        private DateTime _lastTouchDownDateTime = DateTime.MinValue;
-        private System.Timers.Timer _longHoldFocusCheck = null;
-        /// <summary>
-        /// Saver for center before last pinch movement
-        /// </summary>
-        private Point _previousTouch = new Point();
-
+        
         public MapControl(Context context, IAttributeSet attrs) :
             base(context, attrs)
         {
@@ -244,22 +237,6 @@ namespace Mapsui.UI.Android
             }
         }
 
-        private void LongHoldFocusCheckOnElapsed(object sender, ElapsedEventArgs e)
-        {
-            _longHoldFocusCheck.Elapsed -= LongHoldFocusCheckOnElapsed;
-            if (_previousTouch != null && !_previousTouch.IsEmpty())
-            {
-                for (var i = 1; i <= Map.Layers.Count; i++)
-                {
-                    var layer = Map.Layers[Map.Layers.Count - i];
-                    if (layer.HandleDrag(_previousTouch, _previousTouch, _lastTouchDownDateTime))
-                    {
-                        RefreshGraphics();
-                        return;
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// Gets the screen position in device independent units relative to the MapControl.

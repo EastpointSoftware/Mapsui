@@ -21,7 +21,7 @@ namespace Mapsui.UI.iOS
         public MapControl(CGRect frame)
             : base(frame)
         {
-            Initialize();
+            Initialize(); 
         }
 
         [Preserve]
@@ -95,6 +95,21 @@ namespace Mapsui.UI.iOS
             base.TouchesBegan(touches, evt);
 
             _innerRotation = Viewport.Rotation;
+            if (evt.AllTouches.Count == 1)
+            {
+                // this could be a drag (pan) request
+
+                // setup the timer to handle waiting for a delay...
+                _lastTouchDownDateTime = DateTime.UtcNow;
+                _longHoldFocusCheck = new System.Timers.Timer
+                {
+                    AutoReset = false,
+                    Interval = 550,
+                    Enabled = true
+                };
+                _longHoldFocusCheck.Elapsed -= LongHoldFocusCheckOnElapsed;
+                _longHoldFocusCheck.Elapsed += LongHoldFocusCheckOnElapsed;
+            }
         }
 
         public override void TouchesMoved(NSSet touches, UIEvent evt)
@@ -103,15 +118,34 @@ namespace Mapsui.UI.iOS
 
             if (evt.AllTouches.Count == 1)
             {
-                if (touches.AnyObject is UITouch touch)
+                if (touches.AnyObject is UITouch t)
                 {
-                    var position = touch.LocationInView(this).ToMapsui();
-                    var previousPosition = touch.PreviousLocationInView(this).ToMapsui();
+                    var position = t.LocationInView(this).ToMapsui();
+                    
+                    _previousTouch = t.PreviousLocationInView(this).ToMapsui();
 
-                    _viewport.Transform(position, previousPosition);
-                    RefreshGraphics();
+                    var touch = position;
+                    if (_previousTouch != null && !_previousTouch.IsEmpty())
+                    {
+                        // check if a layer wants to intercept this motion
+                        for (var i = 1; i <= Map.Layers.Count; i++)
+                        {
+                            var layer = Map.Layers[Map.Layers.Count - i];
+                            if (layer.HandleDrag(touch, _previousTouch, _lastTouchDownDateTime))
+                            {
+                                RefreshGraphics();
+                                _previousTouch = touch;
+                                return;
+                            }
+                        }
+                        _viewport.Transform(touch, _previousTouch);
+                        RefreshGraphics();
+                    }
+                    _previousTouch = touch;
 
                     _innerRotation = Viewport.Rotation;
+
+
                 }
             }
             else if (evt.AllTouches.Count >= 2)
@@ -155,9 +189,16 @@ namespace Mapsui.UI.iOS
 
         public override void TouchesEnded(NSSet touches, UIEvent e)
         {
+            for (var i = 1; i <= Map.Layers.Count; i++)
+            {
+                var layer = Map.Layers[Map.Layers.Count - i];
+                layer.HandleGestureEnd();
+            }
+            _previousTouch = null;
+            _longHoldFocusCheck.Elapsed -= LongHoldFocusCheckOnElapsed;
             Refresh();
         }
-
+         
         /// <summary>
         /// Gets screen position in device independent units (or DIP or DP).
         /// </summary>
