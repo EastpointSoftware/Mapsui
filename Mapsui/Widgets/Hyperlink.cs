@@ -4,6 +4,7 @@ using System;
 
 namespace Mapsui.Widgets
 {
+
     public class Hyperlink : TextBox
     {
         public string Url { get; set; }
@@ -15,7 +16,7 @@ namespace Mapsui.Widgets
             var args = new HyperlinkWidgetArguments();
 
             Touched?.Invoke(this, args);
-            
+
             return args.Handled;
         }
     }

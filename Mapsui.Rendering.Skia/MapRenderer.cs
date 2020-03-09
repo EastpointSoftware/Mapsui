@@ -39,6 +39,7 @@ namespace Mapsui.Rendering.Skia
             WidgetRenders[typeof(Hyperlink)] = new HyperlinkWidgetRenderer();
             WidgetRenders[typeof(ScaleBarWidget)] = new ScaleBarWidgetRenderer();
             WidgetRenders[typeof(ZoomInOutWidget)] = new ZoomInOutWidgetRenderer();
+            WidgetRenders[typeof(ToggleButtonWidget)] = new ImageButtonWidgetRenderer();
         }
 
         public void Render(object target, IReadOnlyViewport viewport, IEnumerable<ILayer> layers,
@@ -155,7 +156,7 @@ namespace Mapsui.Rendering.Skia
 
         private void Render(object canvas, IReadOnlyViewport viewport, IEnumerable<IWidget> widgets, float layerOpacity)
         {
-            WidgetRenderer.Render(canvas, viewport, widgets, WidgetRenders, layerOpacity);
+            WidgetRenderer.Render(canvas, viewport, widgets, WidgetRenders, layerOpacity, _symbolCache);
         }
 
         public MapInfo GetMapInfo(double x, double y, IReadOnlyViewport viewport, IEnumerable<ILayer> layers, int margin = 0)

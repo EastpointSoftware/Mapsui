@@ -13,7 +13,7 @@ namespace Mapsui.Rendering.Skia.SkiaWidgets
         private SKPaint _paintScaleTextStroke;
 
         public void Draw(SKCanvas canvas, IReadOnlyViewport viewport,  IWidget widget,
-            float layerOpacity)
+            float layerOpacity, SymbolCache symbolCache)
         {
             var scaleBar = (ScaleBarWidget) widget;
             if (!scaleBar.CanTransform()) return;

@@ -14,7 +14,7 @@ namespace Mapsui.Rendering.Skia.SkiaWidgets
         private static SKPaint _paintText;
 
         public void Draw(SKCanvas canvas, IReadOnlyViewport viewport, IWidget widget,
-            float layerOpacity)
+            float layerOpacity, SymbolCache symbolCache)
         {
             var zoomInOut = (ZoomInOutWidget)widget;
 
