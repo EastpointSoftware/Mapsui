@@ -15,7 +15,17 @@ namespace Mapsui.Rendering.Skia.SkiaWidgets
 
             foreach (var widget in widgets)
             {
-                ((ISkiaWidgetRenderer)renders[widget.GetType()]).Draw(canvas, viewport, widget, layerOpacity, symbolCache);
+                var type = widget.GetType();
+                if (renders.ContainsKey(type))
+                {
+                    ((ISkiaWidgetRenderer)renders[type]).Draw(canvas, viewport, widget, layerOpacity, symbolCache);
+                }
+                else if (widget is ICustomWidget customWidget)
+                {
+                    var renderType = customWidget.WidgetRenderer;
+                    var renderer = (ISkiaWidgetRenderer)Activator.CreateInstance(renderType);
+                    renderer.Draw(canvas, viewport, widget, layerOpacity, symbolCache);
+                }
             }
         }
     }

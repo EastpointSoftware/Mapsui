@@ -1,8 +1,9 @@
-﻿using Mapsui.Geometries;
+﻿using System;
+using Mapsui.Geometries;
 
 namespace Mapsui.Widgets
 {
-    public interface IWidget
+    public interface IWidget 
     {
         HorizontalAlignment HorizontalAlignment { get; set; }
         VerticalAlignment VerticalAlignment { get; set; }
