@@ -9,6 +9,7 @@ using CoreGraphics;
 using Mapsui.Geometries;
 using Mapsui.Geometries.Utilities;
 using SkiaSharp.Views.iOS;
+using static Mapsui.UI.iOS.IosPointExtensions;
 
 namespace Mapsui.UI.iOS
 {
@@ -70,7 +71,8 @@ namespace Mapsui.UI.iOS
 
         }
 
-        public float PixelDensity => (float) _canvas.ContentScaleFactor; // todo: Check if I need canvas
+        public float PixelDensity => (float)_canvas.ContentScaleFactor;
+        public float EffectivePixelDensity => ApplyDevicePixelDensity ? (float)PixelDensity : 1; // todo: Check if I need canvas
 
         private void OnDoubleTapped(UITapGestureRecognizer gesture)
         {
@@ -86,7 +88,10 @@ namespace Mapsui.UI.iOS
        
         void OnPaintSurface(object sender, SKPaintGLSurfaceEventArgs args)
         {
-            args.Surface.Canvas.Scale(PixelDensity, PixelDensity);  
+            if (Math.Abs(EffectivePixelDensity - 1) > 0.1)
+            {
+                args.Surface.Canvas.Scale(EffectivePixelDensity, EffectivePixelDensity);
+            }  
             Renderer.Render(args.Surface.Canvas, Viewport, _map.Layers, _map.Widgets, _map.BackColor);
         }
 
@@ -120,9 +125,9 @@ namespace Mapsui.UI.iOS
             {
                 if (touches.AnyObject is UITouch t)
                 {
-                    var position = t.LocationInView(this).ToMapsui();
+                    var position = t.LocationInView(this).ToMapsui().ToScaledPoint(ViewportSizeScalar);
                     
-                    _previousTouch = t.PreviousLocationInView(this).ToMapsui();
+                    _previousTouch = t.PreviousLocationInView(this).ToMapsui().ToScaledPoint(ViewportSizeScalar);
 
                     var touch = position;
                     if (_previousTouch != null && !_previousTouch.IsEmpty())
@@ -195,7 +200,10 @@ namespace Mapsui.UI.iOS
                 layer.HandleGestureEnd();
             }
             _previousTouch = null;
-            _longHoldFocusCheck.Elapsed -= LongHoldFocusCheckOnElapsed;
+            if (_longHoldFocusCheck != null)
+            {
+                _longHoldFocusCheck.Elapsed -= LongHoldFocusCheckOnElapsed;
+            }
             Refresh();
         }
          
@@ -206,7 +214,7 @@ namespace Mapsui.UI.iOS
         /// <returns></returns>
         private Point GetScreenPosition(CGPoint point)
         {
-            return new Point(point.X, point.Y);
+            return new Point(point.X * ViewportSizeScalar, point.Y * ViewportSizeScalar);
         }
        
         private void RunOnUIThread(Action action)
@@ -260,7 +268,7 @@ namespace Mapsui.UI.iOS
             base.Dispose(disposing);
         }
 
-        private static (Point centre, double radius, double angle) GetPinchValues(List<Point> locations)
+        private (Point centre, double radius, double angle) GetPinchValues(List<Point> locations)
         {
             if (locations.Count < 2)
                 throw new ArgumentException();
@@ -274,17 +282,29 @@ namespace Mapsui.UI.iOS
                 centerY += location.Y;
             }
 
-            centerX = centerX / locations.Count;
-            centerY = centerY / locations.Count;
+            centerX = centerX * (int)ViewportSizeScalar / locations.Count ;
+            centerY = centerY * (int)ViewportSizeScalar / locations.Count;
 
-            var radius = Algorithms.Distance(centerX, centerY, locations[0].X, locations[0].Y);
+            var radius = Algorithms.Distance(centerX, centerY, locations[0].X * (int)ViewportSizeScalar, locations[0].Y * (int)ViewportSizeScalar);
 
             var angle = Math.Atan2(locations[1].Y - locations[0].Y, locations[1].X - locations[0].X) * 180.0 / Math.PI;
 
             return (new Point(centerX, centerY), radius, angle);
         }
 
-        private float ViewportWidth => (float)_canvas.Frame.Width; // todo: check if we need _canvas
-        private float ViewportHeight => (float)_canvas.Frame.Height; // todo: check if we need _canvas
+        /// <summary>
+        /// if we're not upscaling the image, we need to resize it from the off
+        /// </summary>
+        private float ViewportSizeScalar => ApplyDevicePixelDensity ? 1 : PixelDensity;
+
+        private float ViewportWidth => (float)_canvas.Frame.Width * ViewportSizeScalar; // todo: check if we need _canvas
+        private float ViewportHeight => (float)_canvas.Frame.Height * ViewportSizeScalar; // todo: check if we need _canvas
+    }
+
+    public static class IosPointExtensions{
+        public static Point ToScaledPoint(this Point point, float scale)
+        {
+            return new Point(point.X * scale, point.Y * scale);
+        }
     }
 }

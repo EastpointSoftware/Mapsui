@@ -42,6 +42,7 @@ namespace Mapsui
         private double _rotation;
         private ReadOnlyPoint _center = new ReadOnlyPoint(0, 0);
         private bool _modified = true;
+        public float PixelScaling { get; set; } = 1;
 
         /// <summary>
         /// Create a new viewport

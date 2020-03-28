@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.IO;
 using Mapsui.Geometries;
 using Mapsui.UI;
 
@@ -25,6 +26,7 @@ namespace Mapsui
         public bool HasSize => _viewport.HasSize;
         public bool IsRotated => _viewport.IsRotated;
         public Quad WindowExtent => _viewport.WindowExtent;
+        public float PixelScaling { get; set; } = 1;
 
         public void Transform(Point position, Point previousPosition, double deltaResolution = 1, double deltaRotation = 0)
         {

@@ -112,5 +112,7 @@ namespace Mapsui
         /// aligned.
         /// </remarks>
         Quad WindowExtent { get; }
+
+        float PixelScaling { get; set; }
     }
 }

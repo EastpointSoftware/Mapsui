@@ -64,6 +64,7 @@ namespace Mapsui.UI.Android
         }
 
         public float PixelDensity => Resources.DisplayMetrics.Density;
+        public float EffectivePixelDensity => ApplyDevicePixelDensity ? PixelDensity : 1;
 
         private void OnDoubleTapped(object sender, GestureDetector.DoubleTapEventArgs e)
         {
@@ -93,7 +94,10 @@ namespace Mapsui.UI.Android
 
         private void CanvasOnPaintSurface(object sender, SKPaintGLSurfaceEventArgs args)
         {
-            args.Surface.Canvas.Scale(PixelDensity, PixelDensity);
+            if (Math.Abs(EffectivePixelDensity - 1) > 0.1)
+            {
+                args.Surface.Canvas.Scale(EffectivePixelDensity, EffectivePixelDensity);
+            }
             Renderer.Render(args.Surface.Canvas, Viewport, _map.Layers, _map.Widgets, _map.BackColor);
 //#if DEBUG
 //            Console.WriteLine($"CanvasOnPaintSurface at {DateTime.UtcNow.ToString("hh:mm:ss")}.");
@@ -250,7 +254,7 @@ namespace Mapsui.UI.Android
             for (var i = 0; i < motionEvent.PointerCount; i++)
             {
                 result.Add(new Point(motionEvent.GetX(i) - view.Left, motionEvent.GetY(i) - view.Top)
-                    .ToDeviceIndependentUnits(PixelDensity));
+                    .ToDeviceIndependentUnits(EffectivePixelDensity));
             }
             return result;
         }
@@ -264,7 +268,7 @@ namespace Mapsui.UI.Android
         private Point GetScreenPosition(MotionEvent motionEvent, View view)
         {
             return GetScreenPositionInPixels(motionEvent, view)
-                .ToDeviceIndependentUnits(PixelDensity);
+                .ToDeviceIndependentUnits(EffectivePixelDensity);
         }
 
         /// <summary>
@@ -369,7 +373,7 @@ namespace Mapsui.UI.Android
         /// <returns>The pixels given as input translated to device independent units.</returns>
         private float ToDeviceIndependentUnits(float pixelCoordinate)
         {
-            return pixelCoordinate / PixelDensity;
+            return pixelCoordinate / EffectivePixelDensity;
         }
     }
 }

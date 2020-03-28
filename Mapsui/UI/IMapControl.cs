@@ -31,6 +31,16 @@ namespace Mapsui.UI
         /// The number of pixel per device independent unit
         /// </summary>
         float PixelDensity { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        float EffectivePixelDensity { get; }
+
+        /// <summary>
+        /// Defines whether the image is drawn and upscaled to the target area size
+        /// (rather than drawn specifically for the target area size)
+        /// </summary>
+        bool ApplyDevicePixelDensity { get; set; }
 
         IRenderer Renderer { get; }
 

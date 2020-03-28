@@ -64,6 +64,29 @@ namespace Mapsui.UI.Wpf
             }
         }
 
+        private bool _applyDevicePixelDensity = true;
+
+        /// <summary>
+        /// Draw then scale to size (rather than draw for size)
+        /// This can drastically improve performance on
+        /// high pixel-density screens, but at the expense of image quality
+        /// </summary>
+        public bool ApplyDevicePixelDensity
+    {
+            get { return _applyDevicePixelDensity; }
+            set
+            {
+                if (_applyDevicePixelDensity != value)
+                {
+                    _applyDevicePixelDensity = value;
+                    OnPropertyChanged();
+
+                    // we must reset the viewport size when this changes
+                    SetViewportSize();
+                }
+            }
+        }
+
         private IRenderer _renderer = new MapRenderer();
 
         /// <summary>
@@ -309,14 +332,14 @@ namespace Mapsui.UI.Wpf
         public Point ToPixels(Point coordinateInDeviceIndependentUnits)
         {
             return new Point(
-                coordinateInDeviceIndependentUnits.X * PixelDensity,
-                coordinateInDeviceIndependentUnits.Y * PixelDensity);
+                coordinateInDeviceIndependentUnits.X * EffectivePixelDensity,
+                coordinateInDeviceIndependentUnits.Y * EffectivePixelDensity);
         }
 
         /// <inheritdoc />
         public Point ToDeviceIndependentUnits(Point coordinateInPixels)
         {
-            return new Point(coordinateInPixels.X / PixelDensity, coordinateInPixels.Y / PixelDensity);
+            return new Point(coordinateInPixels.X / EffectivePixelDensity, coordinateInPixels.Y / EffectivePixelDensity);
         }
 
         private void OnViewportSizeInitialized()
@@ -448,6 +471,7 @@ namespace Mapsui.UI.Wpf
             var hadSize = Viewport.HasSize;
             _viewport.SetSize(ViewportWidth, ViewportHeight);
             if (!hadSize && Viewport.HasSize) OnViewportSizeInitialized();
+            _viewport.PixelScaling = PixelDensity / EffectivePixelDensity;
             CallHomeIfNeeded();
             Refresh();
         }
