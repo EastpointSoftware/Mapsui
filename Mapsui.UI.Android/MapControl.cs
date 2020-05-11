@@ -25,6 +25,9 @@ namespace Mapsui.UI.Android
         private double _previousRadius = 1f;
         private TouchMode _mode = TouchMode.None;
         private Handler _mainLooperHandler;
+
+        public static bool ApplyPixelScaling = true;
+
         /// <summary>
         /// Saver for center before last pinch movement
         /// </summary>
@@ -45,7 +48,7 @@ namespace Mapsui.UI.Android
         public void Initialize()
         {
             SetBackgroundColor(Color.Transparent);
-            _canvas = new SKCanvasView(Context) { IgnorePixelScaling = false };
+            _canvas = new SKCanvasView(Context) { IgnorePixelScaling = ApplyPixelScaling };
             _canvas.PaintSurface += CanvasOnPaintSurface;
             AddView(_canvas);
 
@@ -270,8 +273,12 @@ namespace Mapsui.UI.Android
             var result = new List<Point>();
             for (var i = 0; i < motionEvent.PointerCount; i++)
             {
-                result.Add(new Point(motionEvent.GetX(i) - view.Left, motionEvent.GetY(i) - view.Top)
-                    );//.ToDeviceIndependentUnits(PixelDensity));
+                var point = new Point(motionEvent.GetX(i) - view.Left, motionEvent.GetY(i) - view.Top);
+
+                if (ApplyPixelScaling)
+                    result.Add(point.ToDeviceIndependentUnits(PixelDensity));
+                else
+                    result.Add(point);
             }
             return result;
         }
@@ -284,8 +291,12 @@ namespace Mapsui.UI.Android
         /// <returns></returns>
         private Point GetScreenPosition(MotionEvent motionEvent, View view)
         {
-            return GetScreenPositionInPixels(motionEvent, view);
-                //.ToDeviceIndependentUnits(PixelDensity);
+            var point = GetScreenPositionInPixels(motionEvent, view);
+
+            if (ApplyPixelScaling)
+                return point.ToDeviceIndependentUnits(PixelDensity);
+            else
+                return point;
         }
 
         /// <summary>
@@ -379,8 +390,8 @@ namespace Mapsui.UI.Android
             return (new Point(centerX, centerY), radius, angle);
         }
 
-        private float ViewportWidth => Width; // ToDeviceIndependentUnits(Width);
-        private float ViewportHeight => Height; // ToDeviceIndependentUnits(Height);
+        private float ViewportWidth => ApplyPixelScaling ? ToDeviceIndependentUnits(Width) : Width;
+        private float ViewportHeight => ApplyPixelScaling ? ToDeviceIndependentUnits(Height) : Height;
 
         /// <summary>
         /// In native Android touch positions are in pixels whereas the canvas needs
