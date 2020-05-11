@@ -43,12 +43,12 @@ namespace Mapsui.Rendering
                         foreach (var s in styles)
                         {
                             if (ShouldNotBeApplied(s, viewport)) continue;
-                            callback(viewport, s, feature, (float)layer.Opacity, 20);
+                            callback(viewport, s, feature, (float)layer.Opacity, 7);
                         }
                     }
                     else
                     {
-                        callback(viewport, style, feature, (float)layer.Opacity, 20);
+                        callback(viewport, style, feature, (float)layer.Opacity, 7);
                     }
                 }
             }
@@ -60,7 +60,7 @@ namespace Mapsui.Rendering
                 {
                     if (ShouldNotBeApplied(featureStyle, viewport)) continue;
 
-                    callback(viewport, featureStyle, feature, (float)layer.Opacity, 20);
+                    callback(viewport, featureStyle, feature, (float)layer.Opacity, 7);
 
                 }
             }
